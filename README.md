@@ -70,6 +70,7 @@
   .campo input:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.11)}
   .campo input.error{border-color:var(--bad);background:#fef2f2}
   .campo input.ok{border-color:var(--ok);background:#f0fdf4}
+  .campo input.warn{border-color:var(--warn);background:#fff7ed}
   .campo input::-webkit-outer-spin-button,.campo input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   .campo input[type=number]{-moz-appearance:textfield}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
@@ -151,10 +152,13 @@
     padding:6px 9px;border:none}
   #cost-panel .cost-row.loss .lbl{color:#b91c1c;font-weight:800}
   #cost-panel .cost-row.loss .num{color:#b91c1c;font-size:13px}
-  #cost-panel .cost-row.saving{margin-top:4px;background:#ecfdf5;border-radius:6px;
+  #cost-panel .cost-row.penalty{margin-top:4px;background:#fff7ed;border-radius:6px;
     padding:6px 9px;border:none}
-  #cost-panel .cost-row.saving .lbl{color:#15803d;font-weight:800}
-  #cost-panel .cost-row.saving .num{color:#15803d;font-size:13px}
+  #cost-panel .cost-row.penalty .lbl{color:#c2410c;font-weight:800}
+  #cost-panel .cost-row.penalty .num{color:#c2410c;font-size:13px}
+  #cost-panel .cost-row.penalty.mo{background:#fef3c7}
+  #cost-panel .cost-row.penalty.mo .lbl{color:#92400e}
+  #cost-panel .cost-row.penalty.mo .num{color:#92400e}
   #cost-panel .cost-row.balance{margin-top:6px;padding:9px 10px;border-radius:8px;
     border:none;background:#f1f5f9}
   #cost-panel .cost-row.balance .lbl{font-weight:800;font-size:11.5px}
@@ -211,7 +215,7 @@
   #achievement .card{
     position:relative;
     pointer-events:auto;
-    width:340px; padding:26px 24px 22px;
+    width:360px; padding:26px 24px 22px;
     background:#ffffff;
     border-radius:20px;
     box-shadow:0 24px 60px rgba(15,23,42,.4), 0 2px 6px rgba(15,23,42,.15);
@@ -303,6 +307,8 @@
     animation: slideUp .45s ease .55s both;
   }
   #achievement .msg b{color:#0f172a}
+  #achievement .msg ul{margin:6px 0 0 16px;padding:0}
+  #achievement .msg ul li{margin-bottom:3px}
   #achievement .btn-cont{
     margin-top:14px; width:100%; padding:11px;
     border-radius:10px; border:none; cursor:pointer;
@@ -351,7 +357,6 @@
     100%{opacity:0; transform:translateY(450px) rotate(720deg)}
   }
 
-  /* ============ INFORME FINAL DE CUBICACIONES ============ */
   #informe-final{
     position:fixed; inset:0; z-index:9997;
     display:none; align-items:flex-start; justify-content:center;
@@ -415,6 +420,8 @@
   .inf-obs p{font-size:12px;line-height:1.6;color:#475569;margin:0 0 9px}
   .inf-obs p:last-child{margin-bottom:0}
   .inf-obs b{color:#0f172a}
+  .inf-obs ul{margin:6px 0 0 18px;padding:0}
+  .inf-obs ul li{margin-bottom:4px}
   .inf-firma{margin-top:36px;text-align:center;display:flex;flex-direction:column;align-items:center}
   .firma-linea{width:280px;border-top:1.5px solid #94a3b8;margin-bottom:6px}
   .firma-lbl{font-size:10.5px;color:#64748b;text-transform:uppercase;
@@ -437,7 +444,6 @@
   #error-msg code{background:#f1f5f9;padding:2px 6px;border-radius:5px;
        font-family:ui-monospace,monospace;font-size:12.5px}
 
-  /* ===== ADAPTACIÓN A IFRAMES (GitHub Pages, AVA, Moodle, etc.) ===== */
   @media (max-width:1180px){
     #panel-izq{width:260px}
     #panel-der{width:290px}
@@ -592,28 +598,32 @@
         <span class="num">$115.000 <small>CLP/m³</small></span>
       </div>
       <div class="cost-row">
-        <span class="lbl">Volumen real cubicado</span>
+        <span class="lbl">Volumen real acumulado</span>
         <span class="num" id="cost-vol-real">0.000 <small>m³</small></span>
       </div>
       <div class="cost-row">
-        <span class="lbl">Tu volumen cubicado</span>
+        <span class="lbl">Tu volumen acumulado</span>
         <span class="num" id="cost-vol-est">0.000 <small>m³</small></span>
       </div>
       <div class="cost-row total">
-        <span class="lbl">💵 Costo real acumulado</span>
+        <span class="lbl">💵 Costo real de referencia</span>
         <span class="num" id="cost-real">$0</span>
       </div>
-      <div class="cost-row" id="cost-diff-row">
-        <span class="lbl">Tu costo acumulado</span>
-        <span class="num" id="cost-est">$0</span>
+      <div class="cost-row">
+        <span class="lbl">Tu costo de hormigón</span>
+        <span class="num" id="cost-base">$0</span>
       </div>
       <div class="cost-row loss" id="cost-loss-row" style="display:none">
-        <span class="lbl">🔻 Sobrecosto por exceso</span>
+        <span class="lbl">🔻 Material desperdiciado</span>
         <span class="num" id="cost-loss">$0</span>
       </div>
-      <div class="cost-row saving" id="cost-save-row" style="display:none">
-        <span class="lbl">💚 Ahorro por defecto</span>
-        <span class="num" id="cost-save">$0</span>
+      <div class="cost-row penalty" id="cost-pen-row" style="display:none">
+        <span class="lbl">🚛 Recargo camión adicional</span>
+        <span class="num" id="cost-pen">$0</span>
+      </div>
+      <div class="cost-row penalty mo" id="cost-mo-row" style="display:none">
+        <span class="lbl">👷 Mano de obra extra</span>
+        <span class="num" id="cost-mo">$0</span>
       </div>
       <div class="cost-row balance" id="cost-balance-row" style="display:none">
         <span class="lbl">📊 Balance final proyecto</span>
@@ -671,7 +681,9 @@ setTimeout(() => {
 import * as THREE from 'three';
 window.__threeOK = true;
 
-/* ============ SISTEMA DE SONIDO ============ */
+/* =========================================================
+   0. SISTEMA DE SONIDO
+   ========================================================= */
 let audioCtx = null;
 let sonidoActivo = true;
 function initAudio(){
@@ -715,15 +727,22 @@ function sonidoVictoria(){
 }
 function sonidoEstrella(indice){ initAudio(); tone(880 + indice * 220, 0, 0.15, 'triangle', 0.12); }
 
-/* ============ PRECIO HORMIGÓN ============ */
-const PRECIO_HORMIGON_CLP = 115000;
+/* =========================================================
+   0b. COSTOS DEL HORMIGÓN (Chile)
+   ========================================================= */
+const PRECIO_HORMIGON_CLP        = 115000; // CLP/m³
+const SOBRECOSTO_PEDIDO_ADICIONAL = 250000; // recargo fijo por camión adicional
+const COSTO_MANO_OBRA_EXTRA       = 150000; // cuadrilla esperando + vaciado extra
+
 function formatearCLP(v){
   const n = Math.round(v);
   const signo = n < 0 ? '-' : '';
   return signo + '$' + Math.abs(n).toLocaleString('es-CL');
 }
 
-/* ============ GAMIFICACIÓN ============ */
+/* =========================================================
+   0c. GAMIFICACIÓN
+   ========================================================= */
 const juego = {
   puntos: 0, aciertos: 0, intentos: 0, rachaActual: 0, mejorRacha: 0,
   estrellasTotales: 0, elementosCubicados: 0, proyectoCompletado: false
@@ -741,7 +760,9 @@ function reiniciarGamificacion(){
   actualizarHUDGamificacion();
 }
 
-/* ============ PANEL DE LOGRO ============ */
+/* =========================================================
+   0d. PANEL DE LOGRO
+   ========================================================= */
 const ach = {
   el: document.getElementById('achievement'),
   icon: document.getElementById('ach-icon'),
@@ -760,7 +781,7 @@ function mostrarLogro(tipo, icono, titulo, subtitulo, estrellas, puntos, mensaje
   ach.icon.textContent = icono;
   ach.title.textContent = titulo;
   ach.sub.textContent  = subtitulo;
-  ach.points.textContent = (puntos >= 0 ? '+' : '') + puntos + ' pts';
+  ach.points.textContent = (puntos > 0 ? '+' : '') + puntos + ' pts';
   ach.msg.innerHTML = mensaje;
   ach.stars.innerHTML = '';
   for (let i = 0; i < 3; i++){
@@ -803,7 +824,9 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && ach.el.classList.contains('show')) { ocultarLogro(); e.stopPropagation(); }
 });
 
-/* ============ ELEMENTOS ESTRUCTURALES ============ */
+/* =========================================================
+   1. ELEMENTOS ESTRUCTURALES
+   ========================================================= */
 const ORDEN_UI = ['muro','losa','viga','pilar','emplantillado','cimiento','sobrecimiento'];
 const ELEMENTOS = {
   muro: {
@@ -854,8 +877,11 @@ const ELEMENTOS = {
 const GRUPO_FUNDACION = ['emplantillado','cimiento','sobrecimiento','muro','pilar'];
 const UNIDADES = ['m','cm','mm'];
 const estadoProyecto = {};
+const fillActualPorElemento = {};
 
-/* ============ UTILIDADES ============ */
+/* =========================================================
+   2. UTILIDADES
+   ========================================================= */
 function rand(min, max){
   return Math.max(0.02, Math.round((min + Math.random() * (max - min)) * 100) / 100);
 }
@@ -918,10 +944,15 @@ function calcularPosiciones(){
   ELEMENTOS.pilar.pos = { x:pilarX, y:cimientoTop, z:Z0 };
   const anchoViga = ELEMENTOS.viga.dims.ancho;
   const anchoLosa = ELEMENTOS.losa.dims.ancho;
-  ELEMENTOS.losa.pos = { x:X0, y:vigaTop - ELEMENTOS.losa.dims.alto, z:Z0 + anchoViga / 2 + anchoLosa / 2 };
+  ELEMENTOS.losa.pos = {
+    x: X0, y: vigaTop - ELEMENTOS.losa.dims.alto,
+    z: Z0 + anchoViga / 2 + anchoLosa / 2
+  };
 }
 
-/* ============ ESCENA Y CÁMARA ============ */
+/* =========================================================
+   3. ESCENA Y CÁMARA
+   ========================================================= */
 const contenedor = document.getElementById('viewport');
 const canvas     = document.getElementById('canvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
@@ -975,7 +1006,9 @@ grid.material.transparent = true;
 grid.material.opacity = 0.9;
 scene.add(grid);
 
-/* ============ SPRITES ============ */
+/* =========================================================
+   4. SPRITES
+   ========================================================= */
 function roundRect(ctx, x, y, w, h, r){
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -1044,7 +1077,9 @@ function dibujarCota(sprite, texto){
   sprite.material.map.needsUpdate = true;
 }
 
-/* ============ OBJETOS 3D ============ */
+/* =========================================================
+   5. OBJETOS 3D
+   ========================================================= */
 const objetos = {};
 const grupoRaiz = new THREE.Group();
 scene.add(grupoRaiz);
@@ -1080,7 +1115,10 @@ function crearObjeto(key){
   objetos[key] = { grupo:g, molde, aristas, concreto, etiqueta, fillH:0 };
 }
 ORDEN_UI.forEach(crearObjeto);
-const vanoMat = new THREE.MeshStandardMaterial({ color: 0x1e3a52, roughness: 0.35, metalness: 0.15, emissive: 0x0a1828, emissiveIntensity: 0.4 });
+const vanoMat = new THREE.MeshStandardMaterial({
+  color: 0x1e3a52, roughness: 0.35, metalness: 0.15,
+  emissive: 0x0a1828, emissiveIntensity: 0.4
+});
 const vanoMesh = new THREE.Mesh(GEO_UNIT, vanoMat);
 vanoMesh.renderOrder = 10;
 grupoRaiz.add(vanoMesh);
@@ -1119,19 +1157,27 @@ function actualizarVano(){
   }
 }
 
-/* ============ COTAS ============ */
+/* =========================================================
+   6. COTAS
+   ========================================================= */
 const cotas = {};
 function crearCota(){
   const g = new THREE.Group();
-  const lineaLargo = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-0.5,0,0), new THREE.Vector3(0.5,0,0)]), MAT_COTA_LINEA);
+  const lineaLargo = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-0.5,0,0), new THREE.Vector3(0.5,0,0)
+  ]), MAT_COTA_LINEA);
   const flechaLargoA = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA);
   const flechaLargoB = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA);
   const lblLargo = crearSpriteCota();
-  const lineaAncho = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,-0.5), new THREE.Vector3(0,0,0.5)]), MAT_COTA_LINEA);
+  const lineaAncho = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(0,0,-0.5), new THREE.Vector3(0,0,0.5)
+  ]), MAT_COTA_LINEA);
   const flechaAnchoA = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA);
   const flechaAnchoB = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA);
   const lblAncho = crearSpriteCota();
-  const lineaAlto = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-0.5,0), new THREE.Vector3(0,0.5,0)]), MAT_COTA_LINEA);
+  const lineaAlto = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(0,-0.5,0), new THREE.Vector3(0,0.5,0)
+  ]), MAT_COTA_LINEA);
   const flechaAltoA = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA);
   const flechaAltoB = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA);
   const lblAlto = crearSpriteCota();
@@ -1186,11 +1232,15 @@ function actualizarCotas(key){
 }
 const cotasVano = (() => {
   const g = new THREE.Group();
-  const lineA = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-0.5,0,0), new THREE.Vector3(0.5,0,0)]), MAT_COTA_VANO_LINEA);
+  const lineA = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-0.5,0,0), new THREE.Vector3(0.5,0,0)
+  ]), MAT_COTA_VANO_LINEA);
   const fA1 = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA_VANO);
   const fA2 = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA_VANO);
   const lblA = crearSpriteCota('rgba(30,64,175,0.96)');
-  const lineB = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-0.5,0), new THREE.Vector3(0,0.5,0)]), MAT_COTA_VANO_LINEA);
+  const lineB = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(0,-0.5,0), new THREE.Vector3(0,0.5,0)
+  ]), MAT_COTA_VANO_LINEA);
   const fB1 = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA_VANO);
   const fB2 = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA_VANO);
   const lblB = crearSpriteCota('rgba(30,64,175,0.96)');
@@ -1237,7 +1287,9 @@ function mostrarCotasDe(key){
   if (key === 'muro') actualizarCotasVano();
 }
 
-/* ============ GEOMETRÍA Y OPACIDADES ============ */
+/* =========================================================
+   7. GEOMETRÍA Y OPACIDADES
+   ========================================================= */
 function actualizarOpacidades(){
   for (const key of ORDEN_UI){
     const def = ELEMENTOS[key];
@@ -1297,7 +1349,9 @@ function actualizarEtiquetas(){
   }
 }
 
-/* ============ CHARCO Y FLUJO ============ */
+/* =========================================================
+   8. CHARCO Y FLUJO
+   ========================================================= */
 const geoCharco = new THREE.CircleGeometry(1, 48);
 (function deformar(){
   const pos = geoCharco.attributes.position;
@@ -1313,7 +1367,9 @@ const geoCharco = new THREE.CircleGeometry(1, 48);
   }
   geoCharco.computeVertexNormals();
 })();
-const charcoMat = new THREE.MeshStandardMaterial({ color: 0x6b7280, roughness: 0.85, metalness: 0.02, transparent: true, opacity: 0 });
+const charcoMat = new THREE.MeshStandardMaterial({
+  color: 0x6b7280, roughness: 0.85, metalness: 0.02, transparent: true, opacity: 0
+});
 const charco = new THREE.Mesh(geoCharco, charcoMat);
 charco.rotation.x = -Math.PI / 2;
 charco.position.y = 0.020;
@@ -1364,13 +1420,17 @@ function crearTexturaLiquida(){
 const texturaFlujo = crearTexturaLiquida();
 const flujo = new THREE.Mesh(
   new THREE.CylinderGeometry(0.075, 0.105, 1, 14, 1, true),
-  new THREE.MeshStandardMaterial({ map: texturaFlujo, color: 0xa8aeb5, roughness: 0.55, metalness: 0.05, side: THREE.DoubleSide })
+  new THREE.MeshStandardMaterial({
+    map: texturaFlujo, color: 0xa8aeb5, roughness: 0.55, metalness: 0.05,
+    side: THREE.DoubleSide
+  })
 );
 flujo.visible = false; flujo.renderOrder = 5;
 scene.add(flujo);
 const tolva = new THREE.Mesh(
   new THREE.CylinderGeometry(0.34, 0.14, 0.5, 16, 1, true),
-  new THREE.MeshStandardMaterial({ color:0x94a3b8, roughness:0.6, metalness:0.25, side:THREE.DoubleSide })
+  new THREE.MeshStandardMaterial({ color:0x94a3b8, roughness:0.6, metalness:0.25,
+    side:THREE.DoubleSide })
 );
 tolva.visible = false;
 scene.add(tolva);
@@ -1387,7 +1447,9 @@ function mostrarFlujo(def, alturaHormigon){
 }
 function ocultarFlujo(){ flujo.visible = false; tolva.visible = false; }
 
-/* ============ PARTÍCULAS ============ */
+/* =========================================================
+   9. PARTÍCULAS
+   ========================================================= */
 const PCOUNT = 600;
 const pPos = new Float32Array(PCOUNT * 3);
 const pVel = new Float32Array(PCOUNT * 3);
@@ -1459,7 +1521,9 @@ function actualizarParticulas(dt){
   if (dirty) pGeo.attributes.position.needsUpdate = true;
 }
 
-/* ============ RELLENO / VOLUMEN ============ */
+/* =========================================================
+   10. RELLENO / VOLUMEN
+   ========================================================= */
 function fijarRelleno(key, h){
   const def = ELEMENTOS[key], o = objetos[key];
   const H = def.dims.alto;
@@ -1487,42 +1551,68 @@ function volumenReal(key){
   return v;
 }
 
-/* ============ PANEL DE COSTO ============ */
+/* =========================================================
+   11. PANEL DE COSTO
+   ========================================================= */
 function actualizarPanelCostos(){
   let volRealAcum = 0, volEstAcum = 0, cubicados = 0;
+  let costoRealAcum = 0, costoBaseEst = 0;
+  let numFalta = 0, numDesborda = 0;
+  let volExceso = 0;
+
   for (const k of ORDEN_UI){
     const e = estadoProyecto[k];
-    if (e){ volRealAcum += e.real; volEstAcum += e.estimado; cubicados++; }
+    if (!e) continue;
+    cubicados++;
+    volRealAcum += e.real;
+    volEstAcum  += e.estimado;
+    costoRealAcum += e.real * PRECIO_HORMIGON_CLP;
+    costoBaseEst  += e.estimado * PRECIO_HORMIGON_CLP;
+    if (e.estado === 'falta')         numFalta++;
+    else if (e.estado === 'desborda'){ numDesborda++; volExceso += (e.estimado - e.real); }
   }
-  const costoReal = volRealAcum * PRECIO_HORMIGON_CLP;
-  const costoEst  = volEstAcum * PRECIO_HORMIGON_CLP;
-  const difMonetaria = costoEst - costoReal;
-  const difVolumen = volEstAcum - volRealAcum;
+
+  const recargoAdic   = numFalta * SOBRECOSTO_PEDIDO_ADICIONAL;
+  const manoObraExt   = numFalta * COSTO_MANO_OBRA_EXTRA;
+  const costoTotalEst = costoBaseEst + recargoAdic + manoObraExt;
+  const balance       = costoTotalEst - costoRealAcum;
+
   document.getElementById('cost-prog').textContent = `${cubicados} / ${ORDEN_UI.length}`;
   document.getElementById('cost-vol-real').innerHTML = volRealAcum.toFixed(3) + ' <small>m³</small>';
   document.getElementById('cost-vol-est').innerHTML  = volEstAcum.toFixed(3) + ' <small>m³</small>';
-  document.getElementById('cost-real').textContent = formatearCLP(costoReal);
-  document.getElementById('cost-est').textContent  = formatearCLP(costoEst);
+  document.getElementById('cost-real').textContent   = formatearCLP(costoRealAcum);
+  document.getElementById('cost-base').textContent   = formatearCLP(costoBaseEst);
+
   const lossRow = document.getElementById('cost-loss-row');
-  const saveRow = document.getElementById('cost-save-row');
+  const penRow  = document.getElementById('cost-pen-row');
+  const moRow   = document.getElementById('cost-mo-row');
   const balRow  = document.getElementById('cost-balance-row');
-  if (difVolumen > 0.0005){
-    document.getElementById('cost-loss').textContent = formatearCLP(difMonetaria);
-    lossRow.style.display = 'flex'; saveRow.style.display = 'none';
-  } else if (difVolumen < -0.0005){
-    document.getElementById('cost-save').textContent = formatearCLP(Math.abs(difMonetaria));
-    saveRow.style.display = 'flex'; lossRow.style.display = 'none';
+
+  if (numDesborda > 0 && volExceso > 0.0005){
+    document.getElementById('cost-loss').textContent =
+      formatearCLP(volExceso * PRECIO_HORMIGON_CLP);
+    lossRow.style.display = 'flex';
   } else {
-    lossRow.style.display = 'none'; saveRow.style.display = 'none';
+    lossRow.style.display = 'none';
   }
+  if (numFalta > 0){
+    document.getElementById('cost-pen').textContent = formatearCLP(recargoAdic);
+    document.getElementById('cost-mo').textContent  = formatearCLP(manoObraExt);
+    penRow.style.display = 'flex';
+    moRow.style.display  = 'flex';
+  } else {
+    penRow.style.display = 'none';
+    moRow.style.display  = 'none';
+  }
+
   if (cubicados === ORDEN_UI.length){
     balRow.style.display = 'flex';
     const bal = document.getElementById('cost-balance');
-    if (difVolumen > 0.0005){
-      bal.textContent = '+ ' + formatearCLP(difMonetaria) + ' (exceso)';
+    if (balance > 100){
+      bal.textContent = '+ ' + formatearCLP(balance) + ' (pérdida)';
       bal.style.color = '#b91c1c'; balRow.style.background = '#fef2f2';
-    } else if (difVolumen < -0.0005){
-      bal.textContent = '- ' + formatearCLP(Math.abs(difMonetaria)) + ' (déficit)';
+    } else if (balance < -100){
+      bal.textContent = '− ' + formatearCLP(Math.abs(balance)) + ' (ahorro)';
       bal.style.color = '#b45309'; balRow.style.background = '#fff7ed';
     } else {
       bal.textContent = '$0 (exacto)';
@@ -1531,6 +1621,7 @@ function actualizarPanelCostos(){
   } else {
     balRow.style.display = 'none';
   }
+
   const btnInf = document.getElementById('btn-informe');
   if (btnInf) btnInf.style.display = cubicados > 0 ? 'block' : 'none';
 }
@@ -1539,23 +1630,28 @@ function limpiarPanelCostos(){
   document.getElementById('cost-vol-real').innerHTML = '0.000 <small>m³</small>';
   document.getElementById('cost-vol-est').innerHTML  = '0.000 <small>m³</small>';
   document.getElementById('cost-real').textContent = '$0';
-  document.getElementById('cost-est').textContent  = '$0';
-  document.getElementById('cost-loss-row').style.display = 'none';
-  document.getElementById('cost-save-row').style.display = 'none';
+  document.getElementById('cost-base').textContent = '$0';
+  document.getElementById('cost-loss-row').style.display    = 'none';
+  document.getElementById('cost-pen-row').style.display     = 'none';
+  document.getElementById('cost-mo-row').style.display      = 'none';
   document.getElementById('cost-balance-row').style.display = 'none';
   const btnInf = document.getElementById('btn-informe');
   if (btnInf) btnInf.style.display = 'none';
 }
 
-/* ============ INFORME FINAL ============ */
+/* =========================================================
+   11b. INFORME FINAL DE CUBICACIONES
+   ========================================================= */
 function generarInformeHTML(){
   const fecha = new Date().toLocaleString('es-CL', {
     day:'2-digit', month:'2-digit', year:'numeric',
     hour:'2-digit', minute:'2-digit'
   });
-  let volRealAcum = 0, volEstAcum = 0, costoRealAcum = 0, costoEstAcum = 0;
-  let nExactos = 0, nFalta = 0, nDesborda = 0;
+
+  let volRealAcum = 0, volEstAcum = 0, costoRealAcum = 0, costoBaseEst = 0;
+  let nExactos = 0, nFalta = 0, nDesborda = 0, volExceso = 0, volFalta = 0;
   let filas = '';
+
   for (const k of ORDEN_UI){
     const e = estadoProyecto[k];
     const def = ELEMENTOS[k];
@@ -1572,18 +1668,17 @@ function generarInformeHTML(){
     const costoReal = e.real * PRECIO_HORMIGON_CLP;
     const costoEst  = e.estimado * PRECIO_HORMIGON_CLP;
     costoRealAcum += costoReal;
-    costoEstAcum  += costoEst;
+    costoBaseEst  += costoEst;
     if (e.cls === 'ok')        nExactos++;
-    else if (e.cls === 'warn') nFalta++;
-    else                       nDesborda++;
+    else if (e.cls === 'warn'){ nFalta++; volFalta += (e.real - e.estimado); }
+    else { nDesborda++; volExceso += (e.estimado - e.real); }
+
     const color = e.cls === 'ok' ? '#15803d'
-                : e.cls === 'warn' ? '#c2410c'
-                : '#b91c1c';
-    const icono = e.cls === 'ok' ? '✓'
-                : e.cls === 'warn' ? '▼'
-                : '▲';
+                : e.cls === 'warn' ? '#c2410c' : '#b91c1c';
+    const icono = e.cls === 'ok' ? '✓' : e.cls === 'warn' ? '▼' : '▲';
     const uD = e.dimsUsuario || e.dims;
     const rD = e.dims;
+
     filas += `<tr>
       <td><b>${def.corto}</b><br><span class="dim-small">${def.nombre}</span></td>
       <td class="mono">${uD.L.toFixed(3)} × ${uD.A.toFixed(3)} × ${uD.H.toFixed(3)}</td>
@@ -1597,20 +1692,34 @@ function generarInformeHTML(){
       <td class="mono">${formatearCLP(costoReal)}</td>
     </tr>`;
   }
-  const difVol = volEstAcum - volRealAcum;
-  const difMon = costoEstAcum - costoRealAcum;
-  const totalColor = Math.abs(difVol) < 0.0005 ? '#15803d'
-                    : difVol > 0 ? '#b91c1c' : '#c2410c';
-  const balanceTxt = Math.abs(difVol) < 0.0005 ? '$0 (exacto)'
-                    : difVol > 0 ? '+ ' + formatearCLP(difMon) + ' (sobrecosto)'
-                    : '− ' + formatearCLP(Math.abs(difMon)) + ' (ahorro)';
+
+  const recargoAdic   = nFalta * SOBRECOSTO_PEDIDO_ADICIONAL;
+  const manoObraExtra = nFalta * COSTO_MANO_OBRA_EXTRA;
+  const perdidaExceso = volExceso * PRECIO_HORMIGON_CLP;
+  const costoTotalEst = costoBaseEst + recargoAdic + manoObraExtra;
+  const balance       = costoTotalEst - costoRealAcum;
+
+  const totalColor = balance > 100 ? '#b91c1c' : balance < -100 ? '#c2410c' : '#15803d';
+  const balanceTxt = balance > 100 ? '+ ' + formatearCLP(balance) + ' (pérdida)'
+                    : balance < -100 ? '− ' + formatearCLP(Math.abs(balance)) + ' (ahorro)'
+                    : '$0 (exacto)';
   const precision = juego.intentos > 0
     ? (juego.aciertos / juego.intentos * 100).toFixed(1) : '0.0';
-  const impacto = Math.abs(difVol) < 0.0005
-    ? 'El proyecto se ajusta exactamente al volumen real requerido, sin sobrecostos ni déficit de material.'
-    : difVol > 0
-      ? `Existe un <b>sobrecosto de ${formatearCLP(difMon)}</b> por exceso de hormigón (${difVol.toFixed(3)} m³ adicionales). En obra esto implica desperdicio de material y mayor costo directo.`
-      : `Existe un <b>déficit de ${Math.abs(difVol).toFixed(3)} m³</b> (${formatearCLP(Math.abs(difMon))} por debajo del presupuesto real). En obra esto obligaría a detener la faena y solicitar un camión adicional, con el consiguiente retraso.`;
+
+  let impacto = '';
+  if (Math.abs(balance) <= 100){
+    impacto = 'El proyecto se ajusta exactamente al volumen real requerido, sin sobrecostos ni déficit de material.';
+  } else {
+    const lineas = [];
+    if (nDesborda > 0){
+      lineas.push(`<li><b>${nDesborda} elemento(s) con exceso:</b> material desperdiciado por ${formatearCLP(perdidaExceso)} (${volExceso.toFixed(3)} m³ sobrantes).</li>`);
+    }
+    if (nFalta > 0){
+      lineas.push(`<li><b>${nFalta} elemento(s) con faltante</b> (${volFalta.toFixed(3)} m³ no cubiertos): recargo por camión adicional de ${formatearCLP(recargoAdic)} + mano de obra extra de ${formatearCLP(manoObraExtra)}.</li>`);
+    }
+    impacto = `Balance negativo de <b>${formatearCLP(balance)}</b> respecto al costo real. Desglose:<ul>${lineas.join('')}</ul>`;
+  }
+
   return `
     <div class="inf-header">
       <div>
@@ -1624,6 +1733,7 @@ function generarInformeHTML(){
           <b>${formatearCLP(PRECIO_HORMIGON_CLP)} / m³</b></div>
       </div>
     </div>
+
     <div class="inf-body">
       <section class="inf-section">
         <h2>1 · Resumen ejecutivo</h2>
@@ -1634,15 +1744,16 @@ function generarInformeHTML(){
             <div class="kpi-val">${volRealAcum.toFixed(3)} <small>m³</small></div></div>
           <div class="kpi"><div class="kpi-lbl">Volumen cubicado</div>
             <div class="kpi-val">${volEstAcum.toFixed(3)} <small>m³</small></div></div>
-          <div class="kpi"><div class="kpi-lbl">Costo real</div>
+          <div class="kpi"><div class="kpi-lbl">Costo real (referencia)</div>
             <div class="kpi-val">${formatearCLP(costoRealAcum)}</div></div>
-          <div class="kpi"><div class="kpi-lbl">Costo cubicado</div>
-            <div class="kpi-val">${formatearCLP(costoEstAcum)}</div></div>
+          <div class="kpi"><div class="kpi-lbl">Costo final del estudiante</div>
+            <div class="kpi-val">${formatearCLP(costoTotalEst)}</div></div>
           <div class="kpi" style="border-color:${totalColor};background:${totalColor}14">
             <div class="kpi-lbl">Balance final</div>
             <div class="kpi-val" style="color:${totalColor}">${balanceTxt}</div></div>
         </div>
       </section>
+
       <section class="inf-section">
         <h2>2 · Detalle por elemento estructural</h2>
         <table class="inf-tabla">
@@ -1667,17 +1778,53 @@ function generarInformeHTML(){
               <td colspan="3" style="text-align:right"><b>TOTALES</b></td>
               <td class="mono"><b>${volEstAcum.toFixed(3)}</b></td>
               <td class="mono"><b>${volRealAcum.toFixed(3)}</b></td>
-              <td class="mono" style="color:${totalColor}"><b>${(difVol>=0?'+':'')}${difVol.toFixed(3)}</b></td>
+              <td class="mono" style="color:${totalColor}"><b>${(volEstAcum-volRealAcum>=0?'+':'')}${(volEstAcum-volRealAcum).toFixed(3)}</b></td>
               <td class="mono" style="color:${totalColor}"><b>${
-                volRealAcum>0 ? ((difVol/volRealAcum*100).toFixed(2)) : '0.00'}%</b></td>
-              <td class="mono"><b>${formatearCLP(costoEstAcum)}</b></td>
+                volRealAcum>0 ? (((volEstAcum-volRealAcum)/volRealAcum)*100).toFixed(2) : '0.00'}%</b></td>
+              <td class="mono"><b>${formatearCLP(costoBaseEst)}</b></td>
               <td class="mono"><b>${formatearCLP(costoRealAcum)}</b></td>
             </tr>
           </tfoot>
         </table>
       </section>
+
       <section class="inf-section">
-        <h2>3 · Desempeño del estudiante</h2>
+        <h2>3 · Desglose económico final</h2>
+        <table class="inf-tabla">
+          <thead>
+            <tr><th>Concepto</th><th>Cantidad</th><th>Monto</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Costo real de referencia (hormigón necesario)</td>
+              <td class="mono">${volRealAcum.toFixed(3)} m³</td>
+              <td class="mono">${formatearCLP(costoRealAcum)}</td></tr>
+            <tr><td>Tu costo de hormigón (volumen cubicado × precio)</td>
+              <td class="mono">${volEstAcum.toFixed(3)} m³</td>
+              <td class="mono">${formatearCLP(costoBaseEst)}</td></tr>
+            ${nDesborda > 0 ? `<tr style="background:#fef2f2">
+              <td><b style="color:#b91c1c">Material desperdiciado por exceso</b></td>
+              <td class="mono">${volExceso.toFixed(3)} m³</td>
+              <td class="mono" style="color:#b91c1c">${formatearCLP(perdidaExceso)}</td></tr>` : ''}
+            ${nFalta > 0 ? `<tr style="background:#fff7ed">
+              <td><b style="color:#c2410c">Recargo por camión adicional</b></td>
+              <td class="mono">${nFalta} pedido(s)</td>
+              <td class="mono" style="color:#c2410c">${formatearCLP(recargoAdic)}</td></tr>
+            <tr style="background:#fef3c7">
+              <td><b style="color:#92400e">Mano de obra extra</b></td>
+              <td class="mono">${nFalta} jornada(s)</td>
+              <td class="mono" style="color:#92400e">${formatearCLP(manoObraExtra)}</td></tr>` : ''}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2" style="text-align:right"><b>BALANCE FINAL DEL PROYECTO</b></td>
+              <td class="mono" style="color:${totalColor};font-size:13px"><b>${balanceTxt}</b></td>
+            </tr>
+          </tfoot>
+        </table>
+      </section>
+
+      <section class="inf-section">
+        <h2>4 · Desempeño del estudiante</h2>
         <div class="inf-desempeno">
           <div class="desemp-item"><div class="desemp-lbl">Puntos totales</div>
             <div class="desemp-val" style="color:#1d4ed8">${juego.puntos}</div></div>
@@ -1696,23 +1843,28 @@ function generarInformeHTML(){
           <span class="chip bad">▲ Excedidos: ${nDesborda}</span>
         </div>
       </section>
+
       <section class="inf-section">
-        <h2>4 · Observaciones técnicas</h2>
+        <h2>5 · Observaciones técnicas</h2>
         <div class="inf-obs">
           <p><b>Metodología:</b> El volumen de cada elemento se calcula como V = L × A × H,
           con las dimensiones convertidas a metros. Para el muro se descuenta el volumen del
-          vano (ventana) según las cotas indicadas en el modelo 3D. Se consideran además el
-          emplantillado y el cimiento como base continua bajo muro y pilar.</p>
-          <p><b>Criterio de aceptación:</b> Se considera cubicación exacta aquella cuyo error
-          relativo respecto al volumen real es ≤ 2 %.</p>
+          vano (ventana) según las cotas indicadas en el modelo 3D.</p>
+          <p><b>Modelo económico:</b> El hormigón G25 se valoriza a ${formatearCLP(PRECIO_HORMIGON_CLP)}/m³.
+          Un faltante obliga a solicitar un camión adicional (<b>${formatearCLP(SOBRECOSTO_PEDIDO_ADICIONAL)}</b> de recargo)
+          y extiende la jornada de la cuadrilla (<b>${formatearCLP(COSTO_MANO_OBRA_EXTRA)}</b>).
+          Un exceso implica material no utilizable facturado al cliente.</p>
+          <p><b>Criterio de aceptación:</b> Cubicación exacta cuando el error relativo es ≤ 2 %.</p>
           <p><b>Impacto económico:</b> ${impacto}</p>
         </div>
       </section>
+
       <div class="inf-firma">
         <div class="firma-linea"></div>
         <div class="firma-lbl">Firma del estudiante</div>
       </div>
     </div>
+
     <div class="inf-acciones">
       <button class="inf-btn secundario" id="inf-cerrar">Cerrar</button>
       <button class="inf-btn primario" id="inf-print">🖨️ Imprimir / Guardar PDF</button>
@@ -1731,7 +1883,9 @@ function ocultarInforme(){
   document.getElementById('informe-final').classList.remove('show');
 }
 
-/* ============ VALIDACIÓN ============ */
+/* =========================================================
+   12. VALIDACIÓN (no bloqueante)
+   ========================================================= */
 function validarDimensiones(){
   const def = ELEMENTOS[selKey];
   const L = parseFloat(inLargo.value);
@@ -1742,8 +1896,8 @@ function validarDimensiones(){
   const errores = [];
   const chk = (val, real, dim, campo, unidad) => {
     const ok = isFinite(val) && Math.abs(val - real) / real <= tol;
-    campo.classList.remove('ok','error');
-    campo.classList.add(ok ? 'ok' : 'error');
+    campo.classList.remove('ok','error','warn');
+    campo.classList.add(ok ? 'ok' : 'warn');
     if (!ok) errores.push({ dim, val, real, unidad });
   };
   chk(L, rL, 'largo', inLargo, def.unidades?.largo || 'm');
@@ -1757,11 +1911,13 @@ function mensajeErrorDimensiones(errores){
     let pista = '';
     if (e.unidad === 'cm') pista = 'Recuerda: 1 cm = 0.01 m.';
     if (e.unidad === 'mm') pista = 'Recuerda: 1 mm = 0.001 m.';
-    return `<b>${nombres[e.dim]}</b>: tu valor está fuera de rango. ${pista}`;
+    return `<b>${nombres[e.dim]}</b>: tu valor no coincide con la cota del modelo. ${pista}`;
   }).join('<br>');
 }
 
-/* ============ BLOQUEO ============ */
+/* =========================================================
+   13. BLOQUEO
+   ========================================================= */
 function bloquearElemento(key, cls){
   const btn = document.querySelector(`.elem-btn[data-key="${key}"]`);
   if (!btn) return;
@@ -1795,7 +1951,9 @@ function restaurarResultadoElemento(key){
   feedback.innerHTML = e.mensaje;
 }
 
-/* ============ CÁMARA ============ */
+/* =========================================================
+   14. CÁMARA
+   ========================================================= */
 function centrarEnElemento(key, suave = true){
   const def = ELEMENTOS[key];
   const { largo:L, ancho:A, alto:H } = def.dims;
@@ -1824,7 +1982,9 @@ function actualizarTransicionCamara(dt){
   actualizarCamara(); redimensionar();
 }
 
-/* ============ UI ============ */
+/* =========================================================
+   15. UI
+   ========================================================= */
 const selector   = document.getElementById('selector');
 const inLargo    = document.getElementById('in-largo');
 const inAncho    = document.getElementById('in-ancho');
@@ -1849,7 +2009,9 @@ const avisoDim   = document.getElementById('aviso-dim');
 const notaDetalle = document.getElementById('nota-detalle');
 const notaMuro    = document.getElementById('nota-muro');
 const notaPilar   = document.getElementById('nota-pilar');
+
 let selKey = 'muro';
+
 ORDEN_UI.forEach((key, i) => {
   const def = ELEMENTOS[key];
   const btn = document.createElement('button');
@@ -1867,9 +2029,14 @@ ORDEN_UI.forEach(key => {
   s.innerHTML = `<i style="background:${def.color}"></i>${def.corto}`;
   leyenda.appendChild(s);
 });
+
 function seleccionar(key){
   const btn = document.querySelector(`.elem-btn[data-key="${key}"]`);
   if (btn && btn.classList.contains('cubicado')) return;
+  // Si es el mismo elemento con falta pendiente, NO limpiar inputs (permite retry)
+  if (selKey === key && fillActualPorElemento[key] > 0 && !estadoProyecto[key]){
+    return;
+  }
   selKey = key;
   const def = ELEMENTOS[key];
   document.querySelectorAll('.elem-btn').forEach(b =>
@@ -1877,7 +2044,7 @@ function seleccionar(key){
   lblLargo.textContent = def.etiquetas.largo + ' (m)';
   lblAncho.textContent = def.etiquetas.ancho + ' (m)';
   lblAlto.textContent  = def.etiquetas.alto  + ' (m)';
-  [inLargo, inAncho, inAlto].forEach(i => i.classList.remove('ok','error'));
+  [inLargo, inAncho, inAlto].forEach(i => i.classList.remove('ok','error','warn'));
   inLargo.value = ''; inAncho.value = ''; inAlto.value = ''; inVol.value = '';
   actualizarFormulaViva();
   avisoDim.style.display = 'none';
@@ -1891,6 +2058,7 @@ function seleccionar(key){
   else limpiarResultados();
   centrarEnElemento(key, true);
 }
+
 function actualizarFormulaViva(){
   const L = parseFloat(inLargo.value);
   const A = parseFloat(inAncho.value);
@@ -1901,7 +2069,7 @@ function actualizarFormulaViva(){
 }
 [inLargo, inAncho, inAlto].forEach(inp => {
   inp.addEventListener('input', () => {
-    inp.classList.remove('ok','error');
+    inp.classList.remove('ok','error','warn');
     avisoDim.style.display = 'none';
     actualizarFormulaViva();
   });
@@ -1909,10 +2077,11 @@ function actualizarFormulaViva(){
 document.getElementById('btn-vaciar').addEventListener('click', () => {
   sonidoClick();
   inLargo.value = ''; inAncho.value = ''; inAlto.value = '';
-  [inLargo, inAncho, inAlto].forEach(i => i.classList.remove('ok','error'));
+  [inLargo, inAncho, inAlto].forEach(i => i.classList.remove('ok','error','warn'));
   avisoDim.style.display = 'none';
   actualizarFormulaViva(); inLargo.focus();
 });
+
 function limpiarResultados(){
   badge.className = 'badge'; badge.textContent = 'Sin calcular';
   rReal.textContent = '—'; rEst.textContent = '—';
@@ -1924,8 +2093,11 @@ function limpiarResultados(){
   feedback.innerHTML = 'Lee las cotas del modelo (m, cm o mm), conviértelas a metros, calcula el volumen y escríbelo.';
 }
 
-/* ============ VERTIDO ============ */
+/* =========================================================
+   16. VERTIDO
+   ========================================================= */
 let animacion = null;
+
 function verter(){
   initAudio();
   if (estadoProyecto[selKey]){
@@ -1935,18 +2107,19 @@ function verter(){
     return;
   }
   const def = ELEMENTOS[selKey];
+
+  /* 1) Validar dimensiones — NO BLOQUEA, solo retroalimenta */
   const errores = validarDimensiones();
-  if (errores.length > 0){
-    sonidoError();
+  const dimensionesOK = errores.length === 0;
+  if (!dimensionesOK){
     avisoDim.style.display = 'block';
-    avisoDim.innerHTML = '⚠️ <b>Revisa tu lectura de las cotas.</b><br>' +
-      mensajeErrorDimensiones(errores);
-    feedback.className = 'feedback bad';
-    feedback.innerHTML = '❌ Las dimensiones ingresadas no coinciden con las cotas del modelo. Corrige los campos en rojo.';
-    badge.className = 'badge bad'; badge.textContent = 'DIMENSIONES INCORRECTAS';
-    return;
+    avisoDim.innerHTML = '⚠️ <b>Tu lectura de cotas no es correcta.</b><br>' +
+      mensajeErrorDimensiones(errores) +
+      '<br><i>El vertido continuará y verás las consecuencias.</i>';
+  } else {
+    avisoDim.style.display = 'none';
   }
-  avisoDim.style.display = 'none';
+
   const { largo:L, ancho:A, alto:H } = def.dims;
   const real = volumenReal(selKey);
   const est = parseFloat(inVol.value);
@@ -1956,52 +2129,47 @@ function verter(){
     feedback.innerHTML = '⚠️ Debes ingresar un <b>volumen total mayor que 0</b>.';
     inVol.focus(); return;
   }
+
   const dimsUsuario = {
-    L: parseFloat(inLargo.value),
-    A: parseFloat(inAncho.value),
-    H: parseFloat(inAlto.value)
+    L: parseFloat(inLargo.value) || 0,
+    A: parseFloat(inAncho.value) || 0,
+    H: parseFloat(inAlto.value) || 0
   };
+
   const diff = est - real;
   const pct  = (diff / real) * 100;
   const ratio = est / real;
-  const fillFrac = Math.min(ratio, 1);
+  const fillObjetivo = Math.min(ratio, 1);
+  const fillBase = fillActualPorElemento[selKey] || 0;
+  const fillSiguiente = Math.max(fillBase, fillObjetivo);
+  fillActualPorElemento[selKey] = fillSiguiente;
   const desborda = ratio > 1.002;
+
   let estado;
   if (Math.abs(pct) <= 2) estado = 'exacto';
   else if (diff < 0)      estado = 'falta';
   else                    estado = 'desborda';
+
   const cls = estado === 'exacto' ? 'ok' : (estado === 'falta' ? 'warn' : 'bad');
   const txt = estado === 'exacto' ? '✔ EXACTO' :
               estado === 'falta'  ? '▼ FALTA HORMIGÓN' : '▲ SE DESBORDA';
   badge.className = 'badge ' + cls; badge.textContent = txt;
+
   rReal.textContent = real.toFixed(3) + ' m³';
   rEst.textContent  = est.toFixed(3) + ' m³';
   rDif.textContent  = (diff >= 0 ? '+' : '') + diff.toFixed(3) + ' m³';
   rPct.textContent  = (pct >= 0 ? '+' : '') + pct.toFixed(2) + ' %';
   rDif.className = 'v ' + cls; rPct.className = 'v ' + cls;
-  let extraMuro = '';
-  if (selKey === 'muro' && def.vano){
-    const v = def.vano;
-    const vVano = v.ancho * v.alto * A;
-    extraMuro = `<br><span style="color:#1e40af">Vano: ${v.ancho.toFixed(2)} × ${v.alto.toFixed(2)} m · a descontar: ${vVano.toFixed(3)} m³.</span>`;
-  }
-  let mensajeHTML = '';
-  if (estado === 'exacto'){
-    mensajeHTML = `<b>¡Cubicación correcta!</b> Tu volumen total está dentro del margen del 2&nbsp;%.<br>
-       Real: ${real.toFixed(3)} m³ (cotas verificadas ✔).${extraMuro}`;
-  } else if (estado === 'falta'){
-    mensajeHTML = `<b>Falta hormigón.</b> Escribiste ${est.toFixed(3)} m³ pero el elemento necesita ${real.toFixed(3)} m³.<br>
-       Te faltan <b>${Math.abs(diff).toFixed(3)} m³</b> (${Math.abs(pct).toFixed(2)}&nbsp;% menos).${extraMuro}`;
-  } else {
-    mensajeHTML = `<b>Se desborda.</b> Escribiste ${est.toFixed(3)} m³ y solo caben ${real.toFixed(3)} m³.<br>
-       Sobran <b>${diff.toFixed(3)} m³</b> (${pct.toFixed(2)}&nbsp;% más).${extraMuro}`;
-  }
-  feedback.className = 'feedback ' + cls;
-  feedback.innerHTML = mensajeHTML;
+
+  /* ---- Gamificación ---- */
   juego.intentos++;
   let puntosGanados = 0, estrellas = 0;
   let tipoLogro = estado === 'exacto' ? 'exacto' : (estado === 'falta' ? 'warn' : 'bad');
   let iconoLogro, tituloLogro, subtituloLogro;
+  let opcionesLogro = {};
+
+  let mensajeHTML = '';
+
   if (estado === 'exacto'){
     juego.aciertos++;
     juego.rachaActual++;
@@ -2016,65 +2184,123 @@ function verter(){
     iconoLogro = estrellas === 3 ? '🏆' : '🎯';
     tituloLogro = estrellas === 3 ? '¡PERFECTO!' : '¡EXACTO!';
     subtituloLogro = `Error de ${absPct.toFixed(2)}% · ${estrellas} estrella${estrellas>1?'s':''}`;
+    mensajeHTML =
+      `<b>¡Cubicación correcta!</b> Tu volumen está dentro del margen del 2&nbsp;%.<br>
+       Real: ${real.toFixed(3)} m³ · Estimado: ${est.toFixed(3)} m³.
+       ${!dimensionesOK ? '<br><br><b style="color:#b45309">⚠️ Ojo: tus dimensiones no coincidían con las cotas, pero el volumen total fue correcto.</b>' : ''}`;
     sonidoExacto();
     if (juego.rachaActual >= 3) setTimeout(sonidoVictoria, 500);
+    juego.puntos += puntosGanados;
+    juego.elementosCubicados++;
+
   } else if (estado === 'falta'){
-    juego.rachaActual = 0; puntosGanados = 25; estrellas = 1;
-    iconoLogro = '📉'; tituloLogro = 'Falta hormigón';
-    subtituloLogro = `${Math.abs(diff).toFixed(3)} m³ por debajo`;
+    juego.rachaActual = 0;
+    puntosGanados = 0;
+    estrellas = 0;
+    iconoLogro = '🔄';
+    tituloLogro = 'Hormigón insuficiente';
+    subtituloLogro = `Faltan ${Math.abs(diff).toFixed(3)} m³ · vuelve a verter`;
+    const sobrecostoTotal = SOBRECOSTO_PEDIDO_ADICIONAL + COSTO_MANO_OBRA_EXTRA;
+    mensajeHTML =
+      `<b>El volumen fue insuficiente.</b> Se vertieron ${est.toFixed(3)} m³ pero se necesitan ${real.toFixed(3)} m³.<br><br>
+       <b>En obra real esto implica:</b>
+       <ul>
+         <li>🚛 Recargo por camión adicional: <b>${formatearCLP(SOBRECOSTO_PEDIDO_ADICIONAL)}</b></li>
+         <li>👷 Mano de obra extra (espera + vaciado): <b>${formatearCLP(COSTO_MANO_OBRA_EXTRA)}</b></li>
+       </ul>
+       <b style="color:#c2410c">Sobrecosto estimado: ${formatearCLP(sobrecostoTotal)}</b><br><br>
+       <b>Esta vez sí puedes corregir:</b> ingresa el volumen total correcto y vuelve a verter.`;
     sonidoFalta();
+    opcionesLogro = { textoBtn: '🔄 Volver a intentar' };
+    inVol.value = '';
+    feedback.className = 'feedback ' + cls;
+    feedback.innerHTML = mensajeHTML;
+    actualizarHUDGamificacion();
+    objetos[selKey].fillH = 0;
+    if (fillBase === 0) objetos[selKey].concreto.visible = false;
+    animacion = { key: selKey, t:0,
+      dur: Math.min(5, Math.max(3.2, 3.2 + 1.0 * fillObjetivo)),
+      fillFrac: fillSiguiente, fillBase, ratio, desborda:false, estado };
+    barraFill.className = cls;
+    setTimeout(() => {
+      mostrarLogro(tipoLogro, iconoLogro, tituloLogro, subtituloLogro, 0, 0,
+        mensajeHTML, opcionesLogro);
+      inVol.focus();
+    }, 900);
+    return;
+
   } else {
-    juego.rachaActual = 0; puntosGanados = 25; estrellas = 1;
-    iconoLogro = '💥'; tituloLogro = 'Se desborda';
+    juego.rachaActual = 0;
+    puntosGanados = 25;
+    estrellas = 1;
+    iconoLogro = '💥';
+    tituloLogro = 'Se desborda';
     subtituloLogro = `${diff.toFixed(3)} m³ de exceso`;
+    mensajeHTML =
+      `<b>Te pasaste de hormigón.</b> Pediste ${est.toFixed(3)} m³ y solo caben ${real.toFixed(3)} m³.<br>
+       Sobran <b>${diff.toFixed(3)} m³</b> que se desperdician (${formatearCLP(diff * PRECIO_HORMIGON_CLP)}).`;
     sonidoDesborda();
+    juego.puntos += puntosGanados;
+    juego.elementosCubicados++;
+    feedback.className = 'feedback ' + cls;
+    feedback.innerHTML = mensajeHTML;
   }
-  juego.puntos += puntosGanados;
-  juego.elementosCubicados++;
+
+  /* Guardar resultado SOLO para exacto / desborda */
+  if (estado === 'exacto' || estado === 'desborda'){
+    estadoProyecto[selKey] = {
+      estimado: est, real, diff, pct, ratio, estado, cls, txt, mensaje: mensajeHTML,
+      dims: { L, A, H },
+      dimsUsuario
+    };
+    bloquearElemento(selKey, cls);
+    actualizarPanelCostos();
+  }
+
   actualizarHUDGamificacion();
-  estadoProyecto[selKey] = {
-    estimado: est, real, diff, pct, ratio, estado, cls, txt, mensaje: mensajeHTML,
-    dims: { L, A, H },
-    dimsUsuario
-  };
-  bloquearElemento(selKey, cls);
-  actualizarPanelCostos();
+
+  /* Animación */
   objetos[selKey].fillH = 0;
-  objetos[selKey].concreto.visible = false;
-  ocultarCharco();
-  const dur = Math.min(5, Math.max(3.2, 3.2 + 1.0 * fillFrac + (desborda ? 0.8 : 0)));
-  animacion = { key: selKey, t:0, dur, fillFrac, ratio, desborda, estado };
+  if (fillBase === 0) objetos[selKey].concreto.visible = false;
+  if (!desborda) ocultarCharco();
+  const dur = Math.min(5, Math.max(3.2, 3.2 + 1.0 * fillObjetivo + (desborda ? 0.8 : 0)));
+  animacion = { key: selKey, t:0, dur, fillFrac: fillSiguiente, fillBase, ratio, desborda, estado };
   barraFill.className = cls;
-  const esUltimo = (juego.elementosCubicados === ORDEN_UI.length);
-  setTimeout(() => {
-    if (esUltimo && !juego.proyectoCompletado){
-      juego.proyectoCompletado = true;
-      const bonusFinal = 150;
-      juego.puntos += bonusFinal;
-      actualizarHUDGamificacion();
-      sonidoVictoria();
-      mostrarLogro(
-        'exacto', '🎉', '¡PROYECTO COMPLETADO!',
-        `Sumaste ${juego.puntos} puntos · ${juego.estrellasTotales} ⭐`,
-        3, bonusFinal,
-        `<b>Balance del proyecto:</b><br>` +
-        `• Aciertos exactos: <b>${juego.aciertos} / ${juego.intentos}</b><br>` +
-        `• Mejor racha: <b>${juego.mejorRacha}</b><br>` +
-        `• Puntos totales: <b>${juego.puntos}</b><br>` +
-        `Pulsa el botón para ver el <b>informe técnico completo</b>.`,
-        { confetti: true, textoBtn: '📄 Ver informe final', mostrarInforme: true }
-      );
-    } else {
-      const bonusRachaTxt = (estado === 'exacto' && juego.rachaActual >= 2)
-        ? `<br>🔥 Racha de <b>${juego.rachaActual}</b> aciertos · bonus aplicado.`
-        : '';
-      mostrarLogro(
-        tipoLogro, iconoLogro, tituloLogro, subtituloLogro, estrellas, puntosGanados,
-        mensajeHTML + bonusRachaTxt
-      );
-    }
-  }, 900);
+
+  /* Popup de logro */
+  if (estado !== 'falta'){
+    const esUltimo = (juego.elementosCubicados === ORDEN_UI.length);
+    setTimeout(() => {
+      if (esUltimo && !juego.proyectoCompletado){
+        juego.proyectoCompletado = true;
+        const bonusFinal = 150;
+        juego.puntos += bonusFinal;
+        actualizarHUDGamificacion();
+        sonidoVictoria();
+        mostrarLogro(
+          'exacto', '🎉', '¡PROYECTO COMPLETADO!',
+          `Sumaste ${juego.puntos} puntos · ${juego.estrellasTotales} ⭐`,
+          3, bonusFinal,
+          `<b>Balance del proyecto:</b><br>` +
+          `• Aciertos exactos: <b>${juego.aciertos} / ${juego.intentos}</b><br>` +
+          `• Mejor racha: <b>${juego.mejorRacha}</b><br>` +
+          `• Puntos totales: <b>${juego.puntos}</b><br>` +
+          `Pulsa el botón para ver el <b>informe técnico completo</b>.`,
+          { confetti: true, textoBtn: '📄 Ver informe final', mostrarInforme: true }
+        );
+      } else {
+        const bonusRachaTxt = (estado === 'exacto' && juego.rachaActual >= 2)
+          ? `<br>🔥 Racha de <b>${juego.rachaActual}</b> aciertos · bonus aplicado.`
+          : '';
+        mostrarLogro(
+          tipoLogro, iconoLogro, tituloLogro, subtituloLogro, estrellas, puntosGanados,
+          mensajeHTML + bonusRachaTxt
+        );
+      }
+    }, 900);
+  }
 }
+
 function actualizarAnimacion(dt){
   if (!animacion) return;
   const a = animacion;
@@ -2084,11 +2310,12 @@ function actualizarAnimacion(dt){
   const p = Math.min(1, a.t / a.dur);
   const pFill = Math.min(1, p / 0.82);
   const e = pFill * pFill * (3 - 2 * pFill);
-  const h = a.fillFrac * H * e;
+  const h = (a.fillBase + (a.fillFrac - a.fillBase) * e) * H;
   fijarRelleno(a.key, h);
   const objetivo = Math.min(a.ratio, 1.6) / 1.6;
-  barraFill.style.width = (objetivo * e * 100).toFixed(1) + '%';
-  pctLlenado.textContent = (e * a.ratio * 100).toFixed(1) + ' %';
+  const objetivoBase = a.fillBase / 1.6;
+  barraFill.style.width = ((objetivoBase + (objetivo - objetivoBase) * e) * 100).toFixed(1) + '%';
+  pctLlenado.textContent = ((a.fillBase + (a.fillFrac - a.fillBase) * e) * a.ratio * 100).toFixed(1) + ' %';
   if (p < 1){
     mostrarFlujo(def, h);
     if (a.desborda && p > 0.35){
@@ -2110,7 +2337,9 @@ function actualizarAnimacion(dt){
   }
 }
 
-/* ============ CONTROLES ============ */
+/* =========================================================
+   17. CONTROLES
+   ========================================================= */
 let arrastrando = false, px = 0, py = 0;
 canvas.addEventListener('pointerdown', e => {
   arrastrando = true; px = e.clientX; py = e.clientY;
@@ -2138,6 +2367,7 @@ canvas.addEventListener('wheel', e => {
   camLerp = 1;
   redimensionar();
 }, { passive:false });
+
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
   if (ach.el.classList.contains('show')){
@@ -2153,13 +2383,16 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Enter') verter();
   else if (e.key.toLowerCase() === 'c') centrarEnElemento(selKey, true);
 });
+
 document.addEventListener('keydown', e => {
   if (document.getElementById('informe-final').classList.contains('show')){
     if (e.key === 'Escape'){ ocultarInforme(); e.preventDefault(); e.stopPropagation(); }
   }
 }, true);
 
-/* ============ RESIZE + LOOP ============ */
+/* =========================================================
+   18. RESIZE + LOOP
+   ========================================================= */
 function redimensionar(){
   const w = contenedor.clientWidth || 800;
   const h = contenedor.clientHeight || 600;
@@ -2173,6 +2406,7 @@ function redimensionar(){
   actualizarEscalaEtiquetas();
 }
 window.addEventListener('resize', redimensionar);
+
 let tPrev = performance.now();
 function loop(now){
   requestAnimationFrame(loop);
@@ -2188,30 +2422,36 @@ function loop(now){
   renderer.render(scene, cam);
 }
 
-/* ============ ARRANQUE ============ */
+/* =========================================================
+   19. ARRANQUE
+   ========================================================= */
 document.getElementById('btn-verter').addEventListener('click', () => { initAudio(); verter(); });
 document.getElementById('btn-centrar').addEventListener('click', () => { sonidoClick(); centrarEnElemento(selKey, true); });
 document.getElementById('btn-centrar-hud').addEventListener('click', () => { sonidoClick(); centrarEnElemento(selKey, true); });
+
 document.getElementById('btn-reset').addEventListener('click', () => {
   sonidoClick();
   ocultarInforme();
   animacion = null;
   for (const k of ORDEN_UI) delete estadoProyecto[k];
+  for (const k of ORDEN_UI) delete fillActualPorElemento[k];
   desbloquearTodos();
   limpiarPanelCostos();
   limpiarRellenos();
   limpiarResultados();
   inVol.value = ''; inLargo.value = ''; inAncho.value = ''; inAlto.value = '';
-  [inLargo, inAncho, inAlto].forEach(i => i.classList.remove('ok','error'));
+  [inLargo, inAncho, inAlto].forEach(i => i.classList.remove('ok','error','warn'));
   avisoDim.style.display = 'none';
   reiniciarGamificacion();
   randomizarDimensiones();
   actualizarTodo();
   seleccionar('muro');
 });
+
 document.getElementById('btn-informe').addEventListener('click', () => {
   initAudio(); sonidoClick(); mostrarInforme();
 });
+
 const btnSound = document.getElementById('btn-sound');
 btnSound.addEventListener('click', () => {
   sonidoActivo = !sonidoActivo;
