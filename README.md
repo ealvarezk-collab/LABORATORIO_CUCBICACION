@@ -12,10 +12,17 @@
     --shadow:0 1px 2px rgba(16,24,40,.06), 0 4px 14px rgba(16,24,40,.06);
   }
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0}
-  body{font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-       background:var(--bg);color:var(--text);overflow:hidden;-webkit-font-smoothing:antialiased}
-  #app{display:flex;height:100vh;width:100vw}
+  html,body{
+    height:100%; margin:0!important; padding:0!important; max-width:none!important;
+  }
+  body{
+    font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--text);overflow:hidden;-webkit-font-smoothing:antialiased;
+  }
+  #app{
+    display:flex; height:100vh; width:100vw;
+    min-height:600px; min-width:900px;
+  }
   aside{background:var(--panel);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;z-index:5}
   #panel-izq{width:322px;border-right:1px solid var(--line)}
   #panel-der{width:360px;border-left:1px solid var(--line)}
@@ -189,7 +196,6 @@
   .hud-btn:hover{background:#eff5ff;border-color:#93c5fd}
   .hud-btn.sound{font-size:13px;padding:6px 9px}
 
-  /* ============ PANEL DE LOGRO FLOTANTE ============ */
   #achievement{
     position:fixed; inset:0; z-index:9998;
     display:none; align-items:center; justify-content:center;
@@ -430,7 +436,26 @@
   #error-msg h3{margin:0 0 10px;color:#dc2626;font-size:17px}
   #error-msg code{background:#f1f5f9;padding:2px 6px;border-radius:5px;
        font-family:ui-monospace,monospace;font-size:12.5px}
-  @media (max-width:1180px){#panel-izq{width:280px}#panel-der{width:320px}}
+
+  /* ===== ADAPTACIÓN A IFRAMES (GitHub Pages, AVA, Moodle, etc.) ===== */
+  @media (max-width:1180px){
+    #panel-izq{width:260px}
+    #panel-der{width:290px}
+    .grid3 .campo input{font-size:11.5px;padding:7px 4px}
+    .inf-kpis,.inf-desempeno{grid-template-columns:repeat(2,1fr)}
+  }
+  @media (max-width:960px){
+    #app{min-width:100%;flex-direction:column;height:auto;min-height:100vh}
+    #panel-izq,#panel-der{width:100%;border-left:none;border-right:none;border-bottom:1px solid var(--line)}
+    #viewport{min-height:420px;flex:1 0 420px}
+    aside{max-height:none}
+  }
+  @media (max-height:640px){
+    #panel-izq,#panel-der{font-size:13px}
+    .bloque{padding:10px 14px}
+    .brand{padding:10px 14px}
+    .brand .logo{width:32px;height:32px;font-size:12px}
+  }
 
   @media print{
     body > *:not(#informe-final){display:none !important}
@@ -440,17 +465,6 @@
     .inf-header{background:#fff}
     .inf-tabla th,.kpi,.desemp-item,.chip,.inf-tabla tfoot td{
       -webkit-print-color-adjust:exact;print-color-adjust:exact}
-html,body{margin:0!important;padding:0!important;max-width:none!important}
-#app{min-height:600px;min-width:900px}
-@media (max-width:1180px){
-  #panel-izq{width:260px}
-  #panel-der{width:290px}
-}
-@media (max-width:960px){
-  #app{min-width:100%;flex-direction:column;height:auto;min-height:100vh}
-  #panel-izq,#panel-der{width:100%;border-left:none;border-right:none;border-bottom:1px solid var(--line)}
-  #viewport{min-height:420px;flex:1 0 420px}
-}
   }
 </style>
 </head>
@@ -609,7 +623,6 @@ html,body{margin:0!important;padding:0!important;max-width:none!important}
   </aside>
 </div>
 
-<!-- ============ PANEL DE LOGRO FLOTANTE ============ -->
 <div id="achievement">
   <div class="backdrop" id="ach-backdrop"></div>
   <div class="card">
@@ -626,7 +639,6 @@ html,body{margin:0!important;padding:0!important;max-width:none!important}
   </div>
 </div>
 
-<!-- ============ INFORME FINAL ============ -->
 <div id="informe-final">
   <div class="informe" id="informe-contenido"></div>
 </div>
@@ -659,21 +671,16 @@ setTimeout(() => {
 import * as THREE from 'three';
 window.__threeOK = true;
 
-/* =========================================================
-   0. SISTEMA DE SONIDO (Web Audio API, sin archivos)
-   ========================================================= */
+/* ============ SISTEMA DE SONIDO ============ */
 let audioCtx = null;
 let sonidoActivo = true;
-
 function initAudio(){
   if (!audioCtx){
-    try {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    } catch(e){ audioCtx = null; }
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e){ audioCtx = null; }
   }
   if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 }
-
 function tone(freq, startOffset, dur, type='sine', vol=0.15){
   if (!audioCtx || !sonidoActivo) return;
   const t0 = audioCtx.currentTime + startOffset;
@@ -687,7 +694,6 @@ function tone(freq, startOffset, dur, type='sine', vol=0.15){
   osc.connect(g).connect(audioCtx.destination);
   osc.start(t0); osc.stop(t0 + dur + 0.05);
 }
-
 function sonidoExacto(){
   initAudio();
   tone(523.25, 0.00, 0.18, 'sine', 0.20);
@@ -695,42 +701,21 @@ function sonidoExacto(){
   tone(783.99, 0.22, 0.22, 'sine', 0.20);
   tone(1046.5, 0.36, 0.40, 'triangle', 0.22);
 }
-function sonidoFalta(){
-  initAudio();
-  tone(440, 0.00, 0.22, 'sine', 0.15);
-  tone(369.99, 0.18, 0.30, 'sine', 0.15);
-}
-function sonidoDesborda(){
-  initAudio();
-  tone(233.08, 0.00, 0.22, 'sawtooth', 0.09);
-  tone(174.61, 0.15, 0.35, 'sawtooth', 0.09);
-  tone(116.54, 0.30, 0.45, 'square',   0.07);
-}
-function sonidoClick(){
-  initAudio();
-  tone(880, 0, 0.045, 'square', 0.05);
-}
-function sonidoError(){
-  initAudio();
-  tone(196, 0.00, 0.18, 'square', 0.10);
-  tone(146.83, 0.14, 0.30, 'square', 0.10);
-}
+function sonidoFalta(){ initAudio(); tone(440,0,0.22,'sine',0.15); tone(369.99,0.18,0.30,'sine',0.15); }
+function sonidoDesborda(){ initAudio(); tone(233.08,0,0.22,'sawtooth',0.09); tone(174.61,0.15,0.35,'sawtooth',0.09); tone(116.54,0.30,0.45,'square',0.07); }
+function sonidoClick(){ initAudio(); tone(880,0,0.045,'square',0.05); }
+function sonidoError(){ initAudio(); tone(196,0,0.18,'square',0.10); tone(146.83,0.14,0.30,'square',0.10); }
 function sonidoVictoria(){
   initAudio();
   const notes = [523.25, 659.25, 783.99, 1046.5, 1318.51];
   notes.forEach((n, i) => tone(n, i * 0.10, 0.32, 'triangle', 0.20));
-  tone(1046.5, 0.60, 0.7, 'sine',     0.18);
-  tone(1318.51, 0.60, 0.7, 'sine',    0.15);
+  tone(1046.5, 0.60, 0.7, 'sine', 0.18);
+  tone(1318.51, 0.60, 0.7, 'sine', 0.15);
   tone(1567.98, 0.60, 0.9, 'triangle', 0.15);
 }
-function sonidoEstrella(indice){
-  initAudio();
-  tone(880 + indice * 220, 0, 0.15, 'triangle', 0.12);
-}
+function sonidoEstrella(indice){ initAudio(); tone(880 + indice * 220, 0, 0.15, 'triangle', 0.12); }
 
-/* =========================================================
-   0b. PRECIO DEL HORMIGÓN (Chile)
-   ========================================================= */
+/* ============ PRECIO HORMIGÓN ============ */
 const PRECIO_HORMIGON_CLP = 115000;
 function formatearCLP(v){
   const n = Math.round(v);
@@ -738,41 +723,25 @@ function formatearCLP(v){
   return signo + '$' + Math.abs(n).toLocaleString('es-CL');
 }
 
-/* =========================================================
-   0c. ESTADO DE GAMIFICACIÓN
-   ========================================================= */
+/* ============ GAMIFICACIÓN ============ */
 const juego = {
-  puntos: 0,
-  aciertos: 0,
-  intentos: 0,
-  rachaActual: 0,
-  mejorRacha: 0,
-  estrellasTotales: 0,
-  elementosCubicados: 0,
-  proyectoCompletado: false
+  puntos: 0, aciertos: 0, intentos: 0, rachaActual: 0, mejorRacha: 0,
+  estrellasTotales: 0, elementosCubicados: 0, proyectoCompletado: false
 };
-
 function actualizarHUDGamificacion(){
-  document.getElementById('hud-pts').textContent      = juego.puntos;
-  document.getElementById('hud-racha').textContent    = juego.rachaActual;
+  document.getElementById('hud-pts').textContent       = juego.puntos;
+  document.getElementById('hud-racha').textContent     = juego.rachaActual;
   document.getElementById('hud-estrellas').textContent = juego.estrellasTotales;
 }
-
 function reiniciarGamificacion(){
-  juego.puntos = 0;
-  juego.aciertos = 0;
-  juego.intentos = 0;
-  juego.rachaActual = 0;
-  juego.mejorRacha = 0;
-  juego.estrellasTotales = 0;
-  juego.elementosCubicados = 0;
+  juego.puntos = 0; juego.aciertos = 0; juego.intentos = 0;
+  juego.rachaActual = 0; juego.mejorRacha = 0;
+  juego.estrellasTotales = 0; juego.elementosCubicados = 0;
   juego.proyectoCompletado = false;
   actualizarHUDGamificacion();
 }
 
-/* =========================================================
-   0d. PANEL DE LOGRO
-   ========================================================= */
+/* ============ PANEL DE LOGRO ============ */
 const ach = {
   el: document.getElementById('achievement'),
   icon: document.getElementById('ach-icon'),
@@ -784,18 +753,15 @@ const ach = {
   btn: document.getElementById('ach-btn'),
   confetti: document.getElementById('ach-confetti')
 };
-
 function mostrarLogro(tipo, icono, titulo, subtitulo, estrellas, puntos, mensaje, opciones = {}){
   ach.el.classList.remove('exacto','warn','bad');
   ach.el.classList.add('show');
   if (tipo) ach.el.classList.add(tipo);
-
   ach.icon.textContent = icono;
   ach.title.textContent = titulo;
   ach.sub.textContent  = subtitulo;
   ach.points.textContent = (puntos >= 0 ? '+' : '') + puntos + ' pts';
   ach.msg.innerHTML = mensaje;
-
   ach.stars.innerHTML = '';
   for (let i = 0; i < 3; i++){
     const s = document.createElement('span');
@@ -803,11 +769,9 @@ function mostrarLogro(tipo, icono, titulo, subtitulo, estrellas, puntos, mensaje
     s.className = i < estrellas ? 'on' : 'off';
     ach.stars.appendChild(s);
   }
-
   setTimeout(() => { if (estrellas >= 1) sonidoEstrella(0); }, 400);
   if (estrellas >= 2) setTimeout(() => sonidoEstrella(1), 560);
   if (estrellas >= 3) setTimeout(() => sonidoEstrella(2), 720);
-
   ach.confetti.innerHTML = '';
   if (opciones.confetti){
     const colores = ['#22c55e','#3b82f6','#f59e0b','#ec4899','#a855f7','#38bdf8'];
@@ -821,14 +785,10 @@ function mostrarLogro(tipo, icono, titulo, subtitulo, estrellas, puntos, mensaje
       ach.confetti.appendChild(c);
     }
   }
-
   ach.btn.textContent = opciones.textoBtn || 'Continuar ▶';
   ach.btn.dataset.abrirInforme = opciones.mostrarInforme ? '1' : '';
 }
-
-function ocultarLogro(){
-  ach.el.classList.remove('show');
-}
+function ocultarLogro(){ ach.el.classList.remove('show'); }
 
 ach.btn.addEventListener('click', () => {
   sonidoClick();
@@ -843,11 +803,8 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && ach.el.classList.contains('show')) { ocultarLogro(); e.stopPropagation(); }
 });
 
-/* =========================================================
-   1. ELEMENTOS ESTRUCTURALES
-   ========================================================= */
+/* ============ ELEMENTOS ESTRUCTURALES ============ */
 const ORDEN_UI = ['muro','losa','viga','pilar','emplantillado','cimiento','sobrecimiento'];
-
 const ELEMENTOS = {
   muro: {
     nombre:'Muro de hormigón armado', corto:'Muro',
@@ -894,14 +851,11 @@ const ELEMENTOS = {
     dims:{ largo:4.00, ancho:0.20, alto:0.30 }
   }
 };
-
 const GRUPO_FUNDACION = ['emplantillado','cimiento','sobrecimiento','muro','pilar'];
 const UNIDADES = ['m','cm','mm'];
 const estadoProyecto = {};
 
-/* =========================================================
-   2. Utilidades
-   ========================================================= */
+/* ============ UTILIDADES ============ */
 function rand(min, max){
   return Math.max(0.02, Math.round((min + Math.random() * (max - min)) * 100) / 100);
 }
@@ -911,85 +865,63 @@ function formatearMedida(valorM, unidad){
   if (unidad === 'mm') return Math.round(valorM * 1000) + ' mm';
   return valorM.toFixed(2) + ' m';
 }
-
 function randomizarDimensiones(){
   const largo = rand(3.20, 4.80);
   const espMuro = rand(0.14, 0.22);
   const anchoBase = rand(0.55, 0.75);
   const anchoSobre = espMuro + rand(0.00, 0.05);
-
   ELEMENTOS.muro.dims.largo = largo;
   ELEMENTOS.muro.dims.ancho = espMuro;
   ELEMENTOS.muro.dims.alto  = rand(2.20, 2.80);
-
   ELEMENTOS.sobrecimiento.dims.largo = largo;
   ELEMENTOS.sobrecimiento.dims.ancho = anchoSobre;
   ELEMENTOS.sobrecimiento.dims.alto  = rand(0.28, 0.40);
-
   ELEMENTOS.cimiento.dims.ancho = anchoBase;
   ELEMENTOS.cimiento.dims.alto  = rand(0.50, 0.70);
-
   ELEMENTOS.emplantillado.dims.ancho = anchoBase;
   ELEMENTOS.emplantillado.dims.alto  = rand(0.04, 0.06);
-
   ELEMENTOS.viga.dims.largo = largo;
   ELEMENTOS.viga.dims.ancho = espMuro;
   ELEMENTOS.viga.dims.alto  = rand(0.35, 0.50);
-
   ELEMENTOS.losa.dims.largo = largo + rand(-0.20, 0.20);
   ELEMENTOS.losa.dims.ancho = rand(2.60, 3.40);
   ELEMENTOS.losa.dims.alto  = rand(0.18, 0.25);
-
   const baseP = rand(0.20, 0.30);
   ELEMENTOS.pilar.dims.largo = baseP;
   ELEMENTOS.pilar.dims.ancho = baseP;
-
   for (const key of ORDEN_UI){
     ELEMENTOS[key].unidades = { largo: randUnit(), ancho: randUnit(), alto: randUnit() };
   }
   ELEMENTOS.muro.unidadesVano = { ancho: randUnit(), alto: randUnit() };
-
   calcularPosiciones();
 }
-
 function calcularPosiciones(){
   const X0 = 0, Z0 = 0;
   const baseP  = ELEMENTOS.pilar.dims.largo;
   const pilarX = X0 + ELEMENTOS.muro.dims.largo / 2 + baseP / 2;
-
   const xLeft      = X0 - ELEMENTOS.muro.dims.largo / 2;
   const xRight     = pilarX + baseP / 2;
   const largoFund  = xRight - xLeft;
   const centroFund = (xLeft + xRight) / 2;
-
   ELEMENTOS.emplantillado.dims.largo = largoFund;
   ELEMENTOS.cimiento.dims.largo      = largoFund;
   ELEMENTOS.sobrecimiento.dims.largo = ELEMENTOS.muro.dims.largo;
-
   let y = 0;
   ELEMENTOS.emplantillado.pos = { x:centroFund, y, z:Z0 };  y += ELEMENTOS.emplantillado.dims.alto;
   ELEMENTOS.cimiento.pos      = { x:centroFund, y, z:Z0 };  y += ELEMENTOS.cimiento.dims.alto;
   const cimientoTop = y;
-
   ELEMENTOS.sobrecimiento.pos = { x:X0, y, z:Z0 };  y += ELEMENTOS.sobrecimiento.dims.alto;
   ELEMENTOS.muro.pos          = { x:X0, y, z:Z0 };  y += ELEMENTOS.muro.dims.alto;
   ELEMENTOS.viga.pos          = { x:X0, y, z:Z0 };  y += ELEMENTOS.viga.dims.alto;
   const vigaTop = y;
-
   ELEMENTOS.pilar.dims.alto = vigaTop - cimientoTop;
   ELEMENTOS.pilar.pos = { x:pilarX, y:cimientoTop, z:Z0 };
-
   const anchoViga = ELEMENTOS.viga.dims.ancho;
   const anchoLosa = ELEMENTOS.losa.dims.ancho;
-  ELEMENTOS.losa.pos = {
-    x: X0, y: vigaTop - ELEMENTOS.losa.dims.alto,
-    z: Z0 + anchoViga / 2 + anchoLosa / 2
-  };
+  ELEMENTOS.losa.pos = { x:X0, y:vigaTop - ELEMENTOS.losa.dims.alto, z:Z0 + anchoViga / 2 + anchoLosa / 2 };
 }
 
-/* =========================================================
-   3. ESCENA Y CÁMARA
-   ========================================================= */
+/* ============ ESCENA Y CÁMARA ============ */
 const contenedor = document.getElementById('viewport');
 const canvas     = document.getElementById('canvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
@@ -997,10 +929,8 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xdbe2ea);
-
 const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 400);
 let frustum = 11.0;
 let theta   = Math.PI / 4;
@@ -1009,7 +939,6 @@ const RADIUS = 60;
 const camCurrent = { target: new THREE.Vector3(0.4, 2.0, 0.6), frustum: 11.0 };
 const camGoal    = { target: new THREE.Vector3(0.4, 2.0, 0.6), frustum: 11.0 };
 let camLerp = 1;
-
 function actualizarCamara(){
   const sp = Math.sin(phi), cp = Math.cos(phi);
   cam.position.set(
@@ -1019,7 +948,6 @@ function actualizarCamara(){
   );
   cam.lookAt(camCurrent.target);
 }
-
 scene.add(new THREE.AmbientLight(0xffffff, 0.55));
 scene.add(new THREE.HemisphereLight(0xffffff, 0x8fa0b3, 0.75));
 const dir = new THREE.DirectionalLight(0xffffff, 1.15);
@@ -1034,7 +962,6 @@ scene.add(dir);
 const fill = new THREE.DirectionalLight(0xdbe6f5, 0.45);
 fill.position.set(-9, 7, -8);
 scene.add(fill);
-
 const suelo = new THREE.Mesh(
   new THREE.PlaneGeometry(80, 80),
   new THREE.MeshStandardMaterial({ color:0xffffff, roughness:1, metalness:0 })
@@ -1042,16 +969,13 @@ const suelo = new THREE.Mesh(
 suelo.rotation.x = -Math.PI / 2;
 suelo.receiveShadow = true;
 scene.add(suelo);
-
 const grid = new THREE.GridHelper(80, 80, 0xc3ccd9, 0xe0e6ee);
 grid.position.y = 0.005;
 grid.material.transparent = true;
 grid.material.opacity = 0.9;
 scene.add(grid);
 
-/* =========================================================
-   4. SPRITES
-   ========================================================= */
+/* ============ SPRITES ============ */
 function roundRect(ctx, x, y, w, h, r){
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -1120,9 +1044,7 @@ function dibujarCota(sprite, texto){
   sprite.material.map.needsUpdate = true;
 }
 
-/* =========================================================
-   5. OBJETOS 3D
-   ========================================================= */
+/* ============ OBJETOS 3D ============ */
 const objetos = {};
 const grupoRaiz = new THREE.Group();
 scene.add(grupoRaiz);
@@ -1133,7 +1055,6 @@ const MAT_FLECHA = new THREE.MeshBasicMaterial({ color: 0xb91c1c });
 const MAT_COTA_LINEA = new THREE.LineBasicMaterial({ color: 0xb91c1c, transparent:true, opacity:0.95 });
 const MAT_FLECHA_VANO = new THREE.MeshBasicMaterial({ color: 0x1e40af });
 const MAT_COTA_VANO_LINEA = new THREE.LineBasicMaterial({ color: 0x1e40af, transparent:true, opacity:0.95 });
-
 function crearObjeto(key){
   const def = ELEMENTOS[key];
   const g = new THREE.Group();
@@ -1159,11 +1080,7 @@ function crearObjeto(key){
   objetos[key] = { grupo:g, molde, aristas, concreto, etiqueta, fillH:0 };
 }
 ORDEN_UI.forEach(crearObjeto);
-
-const vanoMat = new THREE.MeshStandardMaterial({
-  color: 0x1e3a52, roughness: 0.35, metalness: 0.15,
-  emissive: 0x0a1828, emissiveIntensity: 0.4
-});
+const vanoMat = new THREE.MeshStandardMaterial({ color: 0x1e3a52, roughness: 0.35, metalness: 0.15, emissive: 0x0a1828, emissiveIntensity: 0.4 });
 const vanoMesh = new THREE.Mesh(GEO_UNIT, vanoMat);
 vanoMesh.renderOrder = 10;
 grupoRaiz.add(vanoMesh);
@@ -1175,7 +1092,6 @@ const alfMat = new THREE.MeshStandardMaterial({ color: 0xdfe6ee, roughness: 0.7,
 const alfMesh = new THREE.Mesh(GEO_UNIT, alfMat);
 alfMesh.renderOrder = 9;
 grupoRaiz.add(alfMesh);
-
 function actualizarVano(){
   const m = ELEMENTOS.muro;
   const H = m.dims.alto, A = m.dims.ancho, L = m.dims.largo;
@@ -1203,27 +1119,19 @@ function actualizarVano(){
   }
 }
 
-/* =========================================================
-   6. COTAS
-   ========================================================= */
+/* ============ COTAS ============ */
 const cotas = {};
 function crearCota(){
   const g = new THREE.Group();
-  const lineaLargo = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(-0.5,0,0), new THREE.Vector3(0.5,0,0)
-  ]), MAT_COTA_LINEA);
+  const lineaLargo = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-0.5,0,0), new THREE.Vector3(0.5,0,0)]), MAT_COTA_LINEA);
   const flechaLargoA = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA);
   const flechaLargoB = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA);
   const lblLargo = crearSpriteCota();
-  const lineaAncho = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(0,0,-0.5), new THREE.Vector3(0,0,0.5)
-  ]), MAT_COTA_LINEA);
+  const lineaAncho = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,-0.5), new THREE.Vector3(0,0,0.5)]), MAT_COTA_LINEA);
   const flechaAnchoA = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA);
   const flechaAnchoB = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA);
   const lblAncho = crearSpriteCota();
-  const lineaAlto = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(0,-0.5,0), new THREE.Vector3(0,0.5,0)
-  ]), MAT_COTA_LINEA);
+  const lineaAlto = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-0.5,0), new THREE.Vector3(0,0.5,0)]), MAT_COTA_LINEA);
   const flechaAltoA = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA);
   const flechaAltoB = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA);
   const lblAlto = crearSpriteCota();
@@ -1244,7 +1152,6 @@ ORDEN_UI.forEach(key => {
   grupoRaiz.add(c.grupo);
   cotas[key] = c;
 });
-
 function actualizarCotas(key){
   const def = ELEMENTOS[key];
   const c = cotas[key];
@@ -1252,7 +1159,6 @@ function actualizarCotas(key){
   const p = def.pos;
   const off = 0.30;
   const u = def.unidades || { largo:'m', ancho:'m', alto:'m' };
-
   const yL = p.y + 0.02, zL = p.z - A/2 - off;
   const vL1 = new THREE.Vector3(p.x - L/2, yL, zL);
   const vL2 = new THREE.Vector3(p.x + L/2, yL, zL);
@@ -1261,7 +1167,6 @@ function actualizarCotas(key){
   c.largo.b.position.copy(vL2); c.largo.b.rotation.set(0, 0, -Math.PI/2);
   c.largo.lbl.position.set(p.x, yL + 0.16, zL);
   dibujarCota(c.largo.lbl, formatearMedida(L, u.largo));
-
   const yA = p.y + 0.02, xA = p.x + L/2 + off;
   const vA1 = new THREE.Vector3(xA, yA, p.z - A/2);
   const vA2 = new THREE.Vector3(xA, yA, p.z + A/2);
@@ -1270,7 +1175,6 @@ function actualizarCotas(key){
   c.ancho.b.position.copy(vA2); c.ancho.b.rotation.set(Math.PI/2, 0, 0);
   c.ancho.lbl.position.set(xA + 0.18, yA + 0.16, p.z);
   dibujarCota(c.ancho.lbl, formatearMedida(A, u.ancho));
-
   const xH = p.x - L/2 - off, zH = p.z - A/2 - off;
   const vH1 = new THREE.Vector3(xH, p.y, zH);
   const vH2 = new THREE.Vector3(xH, p.y + H, zH);
@@ -1280,18 +1184,13 @@ function actualizarCotas(key){
   c.alto.lbl.position.set(xH - 0.22, p.y + H/2, zH);
   dibujarCota(c.alto.lbl, formatearMedida(H, u.alto));
 }
-
 const cotasVano = (() => {
   const g = new THREE.Group();
-  const lineA = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(-0.5,0,0), new THREE.Vector3(0.5,0,0)
-  ]), MAT_COTA_VANO_LINEA);
+  const lineA = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-0.5,0,0), new THREE.Vector3(0.5,0,0)]), MAT_COTA_VANO_LINEA);
   const fA1 = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA_VANO);
   const fA2 = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA_VANO);
   const lblA = crearSpriteCota('rgba(30,64,175,0.96)');
-  const lineB = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(0,-0.5,0), new THREE.Vector3(0,0.5,0)
-  ]), MAT_COTA_VANO_LINEA);
+  const lineB = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-0.5,0), new THREE.Vector3(0,0.5,0)]), MAT_COTA_VANO_LINEA);
   const fB1 = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA_VANO);
   const fB2 = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA_VANO);
   const lblB = crearSpriteCota('rgba(30,64,175,0.96)');
@@ -1306,7 +1205,6 @@ const cotasVano = (() => {
     alto:  { line: lineB, a: fB1, b: fB2, lbl: lblB }
   };
 })();
-
 function actualizarCotasVano(){
   const m = ELEMENTOS.muro;
   const { vano } = m;
@@ -1315,7 +1213,6 @@ function actualizarCotasVano(){
   const yCentro = m.pos.y + vano.alfeizar + vano.alto/2;
   const zFrente = m.pos.z + A/2 + 0.001;
   const off = 0.18;
-
   const yA = yCentro - vano.alto/2 - off;
   const vA1 = new THREE.Vector3(m.pos.x - vano.ancho/2, yA, zFrente);
   const vA2 = new THREE.Vector3(m.pos.x + vano.ancho/2, yA, zFrente);
@@ -1324,7 +1221,6 @@ function actualizarCotasVano(){
   cotasVano.ancho.b.position.copy(vA2); cotasVano.ancho.b.rotation.set(0, 0, -Math.PI/2);
   cotasVano.ancho.lbl.position.set(m.pos.x, yA - 0.14, zFrente);
   dibujarCota(cotasVano.ancho.lbl, formatearMedida(vano.ancho, uv.ancho));
-
   const xB = m.pos.x + vano.ancho/2 + off;
   const vB1 = new THREE.Vector3(xB, yCentro - vano.alto/2, zFrente);
   const vB2 = new THREE.Vector3(xB, yCentro + vano.alto/2, zFrente);
@@ -1334,7 +1230,6 @@ function actualizarCotasVano(){
   cotasVano.alto.lbl.position.set(xB + 0.18, yCentro, zFrente);
   dibujarCota(cotasVano.alto.lbl, formatearMedida(vano.alto, uv.alto));
 }
-
 function mostrarCotasDe(key){
   for (const k of ORDEN_UI) cotas[k].grupo.visible = (k === key);
   cotasVano.grupo.visible = (key === 'muro');
@@ -1342,9 +1237,7 @@ function mostrarCotasDe(key){
   if (key === 'muro') actualizarCotasVano();
 }
 
-/* =========================================================
-   7. GEOMETRÍA Y OPACIDADES
-   ========================================================= */
+/* ============ GEOMETRÍA Y OPACIDADES ============ */
 function actualizarOpacidades(){
   for (const key of ORDEN_UI){
     const def = ELEMENTOS[key];
@@ -1404,9 +1297,7 @@ function actualizarEtiquetas(){
   }
 }
 
-/* =========================================================
-   8. CHARCO Y FLUJO
-   ========================================================= */
+/* ============ CHARCO Y FLUJO ============ */
 const geoCharco = new THREE.CircleGeometry(1, 48);
 (function deformar(){
   const pos = geoCharco.attributes.position;
@@ -1422,9 +1313,7 @@ const geoCharco = new THREE.CircleGeometry(1, 48);
   }
   geoCharco.computeVertexNormals();
 })();
-const charcoMat = new THREE.MeshStandardMaterial({
-  color: 0x6b7280, roughness: 0.85, metalness: 0.02, transparent: true, opacity: 0
-});
+const charcoMat = new THREE.MeshStandardMaterial({ color: 0x6b7280, roughness: 0.85, metalness: 0.02, transparent: true, opacity: 0 });
 const charco = new THREE.Mesh(geoCharco, charcoMat);
 charco.rotation.x = -Math.PI / 2;
 charco.position.y = 0.020;
@@ -1438,7 +1327,6 @@ charcoBorde.position.y = 0.022;
 charcoBorde.visible = false;
 charcoBorde.renderOrder = 3;
 scene.add(charcoBorde);
-
 function mostrarCharco(def, progreso, exceso){
   const rBase = Math.max(def.dims.largo, def.dims.ancho) * 0.55;
   const rMax = rBase * (1 + exceso * 1.6);
@@ -1455,7 +1343,6 @@ function ocultarCharco(){
   charco.visible = false; charcoBorde.visible = false;
   charcoMat.opacity = 0; charcoBorde.material.opacity = 0;
 }
-
 function crearTexturaLiquida(){
   const cv = document.createElement('canvas');
   cv.width = 32; cv.height = 64;
@@ -1477,17 +1364,13 @@ function crearTexturaLiquida(){
 const texturaFlujo = crearTexturaLiquida();
 const flujo = new THREE.Mesh(
   new THREE.CylinderGeometry(0.075, 0.105, 1, 14, 1, true),
-  new THREE.MeshStandardMaterial({
-    map: texturaFlujo, color: 0xa8aeb5, roughness: 0.55, metalness: 0.05,
-    side: THREE.DoubleSide
-  })
+  new THREE.MeshStandardMaterial({ map: texturaFlujo, color: 0xa8aeb5, roughness: 0.55, metalness: 0.05, side: THREE.DoubleSide })
 );
 flujo.visible = false; flujo.renderOrder = 5;
 scene.add(flujo);
 const tolva = new THREE.Mesh(
   new THREE.CylinderGeometry(0.34, 0.14, 0.5, 16, 1, true),
-  new THREE.MeshStandardMaterial({ color:0x94a3b8, roughness:0.6, metalness:0.25,
-    side:THREE.DoubleSide })
+  new THREE.MeshStandardMaterial({ color:0x94a3b8, roughness:0.6, metalness:0.25, side:THREE.DoubleSide })
 );
 tolva.visible = false;
 scene.add(tolva);
@@ -1504,9 +1387,7 @@ function mostrarFlujo(def, alturaHormigon){
 }
 function ocultarFlujo(){ flujo.visible = false; tolva.visible = false; }
 
-/* =========================================================
-   9. PARTÍCULAS
-   ========================================================= */
+/* ============ PARTÍCULAS ============ */
 const PCOUNT = 600;
 const pPos = new Float32Array(PCOUNT * 3);
 const pVel = new Float32Array(PCOUNT * 3);
@@ -1578,9 +1459,7 @@ function actualizarParticulas(dt){
   if (dirty) pGeo.attributes.position.needsUpdate = true;
 }
 
-/* =========================================================
-   10. RELLENO / VOLUMEN
-   ========================================================= */
+/* ============ RELLENO / VOLUMEN ============ */
 function fijarRelleno(key, h){
   const def = ELEMENTOS[key], o = objetos[key];
   const H = def.dims.alto;
@@ -1608,9 +1487,7 @@ function volumenReal(key){
   return v;
 }
 
-/* =========================================================
-   11. PANEL DE COSTO ACUMULATIVO
-   ========================================================= */
+/* ============ PANEL DE COSTO ============ */
 function actualizarPanelCostos(){
   let volRealAcum = 0, volEstAcum = 0, cubicados = 0;
   for (const k of ORDEN_UI){
@@ -1621,17 +1498,14 @@ function actualizarPanelCostos(){
   const costoEst  = volEstAcum * PRECIO_HORMIGON_CLP;
   const difMonetaria = costoEst - costoReal;
   const difVolumen = volEstAcum - volRealAcum;
-
   document.getElementById('cost-prog').textContent = `${cubicados} / ${ORDEN_UI.length}`;
   document.getElementById('cost-vol-real').innerHTML = volRealAcum.toFixed(3) + ' <small>m³</small>';
   document.getElementById('cost-vol-est').innerHTML  = volEstAcum.toFixed(3) + ' <small>m³</small>';
   document.getElementById('cost-real').textContent = formatearCLP(costoReal);
   document.getElementById('cost-est').textContent  = formatearCLP(costoEst);
-
   const lossRow = document.getElementById('cost-loss-row');
   const saveRow = document.getElementById('cost-save-row');
   const balRow  = document.getElementById('cost-balance-row');
-
   if (difVolumen > 0.0005){
     document.getElementById('cost-loss').textContent = formatearCLP(difMonetaria);
     lossRow.style.display = 'flex'; saveRow.style.display = 'none';
@@ -1641,7 +1515,6 @@ function actualizarPanelCostos(){
   } else {
     lossRow.style.display = 'none'; saveRow.style.display = 'none';
   }
-
   if (cubicados === ORDEN_UI.length){
     balRow.style.display = 'flex';
     const bal = document.getElementById('cost-balance');
@@ -1658,8 +1531,6 @@ function actualizarPanelCostos(){
   } else {
     balRow.style.display = 'none';
   }
-
-  /* Mostrar/ocultar botón del informe */
   const btnInf = document.getElementById('btn-informe');
   if (btnInf) btnInf.style.display = cubicados > 0 ? 'block' : 'none';
 }
@@ -1676,23 +1547,18 @@ function limpiarPanelCostos(){
   if (btnInf) btnInf.style.display = 'none';
 }
 
-/* =========================================================
-   11b. INFORME FINAL DE CUBICACIONES
-   ========================================================= */
+/* ============ INFORME FINAL ============ */
 function generarInformeHTML(){
   const fecha = new Date().toLocaleString('es-CL', {
     day:'2-digit', month:'2-digit', year:'numeric',
     hour:'2-digit', minute:'2-digit'
   });
-
   let volRealAcum = 0, volEstAcum = 0, costoRealAcum = 0, costoEstAcum = 0;
   let nExactos = 0, nFalta = 0, nDesborda = 0;
   let filas = '';
-
   for (const k of ORDEN_UI){
     const e = estadoProyecto[k];
     const def = ELEMENTOS[k];
-
     if (!e){
       filas += `<tr style="opacity:.5">
         <td><b>${def.corto}</b><br><span class="dim-small">${def.nombre}</span></td>
@@ -1701,28 +1567,23 @@ function generarInformeHTML(){
         </td></tr>`;
       continue;
     }
-
     volRealAcum += e.real;
     volEstAcum  += e.estimado;
     const costoReal = e.real * PRECIO_HORMIGON_CLP;
     const costoEst  = e.estimado * PRECIO_HORMIGON_CLP;
     costoRealAcum += costoReal;
     costoEstAcum  += costoEst;
-
     if (e.cls === 'ok')        nExactos++;
     else if (e.cls === 'warn') nFalta++;
     else                       nDesborda++;
-
     const color = e.cls === 'ok' ? '#15803d'
                 : e.cls === 'warn' ? '#c2410c'
                 : '#b91c1c';
     const icono = e.cls === 'ok' ? '✓'
                 : e.cls === 'warn' ? '▼'
                 : '▲';
-
     const uD = e.dimsUsuario || e.dims;
     const rD = e.dims;
-
     filas += `<tr>
       <td><b>${def.corto}</b><br><span class="dim-small">${def.nombre}</span></td>
       <td class="mono">${uD.L.toFixed(3)} × ${uD.A.toFixed(3)} × ${uD.H.toFixed(3)}</td>
@@ -1736,7 +1597,6 @@ function generarInformeHTML(){
       <td class="mono">${formatearCLP(costoReal)}</td>
     </tr>`;
   }
-
   const difVol = volEstAcum - volRealAcum;
   const difMon = costoEstAcum - costoRealAcum;
   const totalColor = Math.abs(difVol) < 0.0005 ? '#15803d'
@@ -1746,13 +1606,11 @@ function generarInformeHTML(){
                     : '− ' + formatearCLP(Math.abs(difMon)) + ' (ahorro)';
   const precision = juego.intentos > 0
     ? (juego.aciertos / juego.intentos * 100).toFixed(1) : '0.0';
-
   const impacto = Math.abs(difVol) < 0.0005
     ? 'El proyecto se ajusta exactamente al volumen real requerido, sin sobrecostos ni déficit de material.'
     : difVol > 0
       ? `Existe un <b>sobrecosto de ${formatearCLP(difMon)}</b> por exceso de hormigón (${difVol.toFixed(3)} m³ adicionales). En obra esto implica desperdicio de material y mayor costo directo.`
       : `Existe un <b>déficit de ${Math.abs(difVol).toFixed(3)} m³</b> (${formatearCLP(Math.abs(difMon))} por debajo del presupuesto real). En obra esto obligaría a detener la faena y solicitar un camión adicional, con el consiguiente retraso.`;
-
   return `
     <div class="inf-header">
       <div>
@@ -1766,7 +1624,6 @@ function generarInformeHTML(){
           <b>${formatearCLP(PRECIO_HORMIGON_CLP)} / m³</b></div>
       </div>
     </div>
-
     <div class="inf-body">
       <section class="inf-section">
         <h2>1 · Resumen ejecutivo</h2>
@@ -1786,7 +1643,6 @@ function generarInformeHTML(){
             <div class="kpi-val" style="color:${totalColor}">${balanceTxt}</div></div>
         </div>
       </section>
-
       <section class="inf-section">
         <h2>2 · Detalle por elemento estructural</h2>
         <table class="inf-tabla">
@@ -1820,7 +1676,6 @@ function generarInformeHTML(){
           </tfoot>
         </table>
       </section>
-
       <section class="inf-section">
         <h2>3 · Desempeño del estudiante</h2>
         <div class="inf-desempeno">
@@ -1841,7 +1696,6 @@ function generarInformeHTML(){
           <span class="chip bad">▲ Excedidos: ${nDesborda}</span>
         </div>
       </section>
-
       <section class="inf-section">
         <h2>4 · Observaciones técnicas</h2>
         <div class="inf-obs">
@@ -1854,20 +1708,17 @@ function generarInformeHTML(){
           <p><b>Impacto económico:</b> ${impacto}</p>
         </div>
       </section>
-
       <div class="inf-firma">
         <div class="firma-linea"></div>
         <div class="firma-lbl">Firma del estudiante</div>
       </div>
     </div>
-
     <div class="inf-acciones">
       <button class="inf-btn secundario" id="inf-cerrar">Cerrar</button>
       <button class="inf-btn primario" id="inf-print">🖨️ Imprimir / Guardar PDF</button>
     </div>
   `;
 }
-
 function mostrarInforme(){
   document.getElementById('informe-contenido').innerHTML = generarInformeHTML();
   document.getElementById('informe-final').classList.add('show');
@@ -1880,9 +1731,7 @@ function ocultarInforme(){
   document.getElementById('informe-final').classList.remove('show');
 }
 
-/* =========================================================
-   12. VALIDACIÓN DE DIMENSIONES
-   ========================================================= */
+/* ============ VALIDACIÓN ============ */
 function validarDimensiones(){
   const def = ELEMENTOS[selKey];
   const L = parseFloat(inLargo.value);
@@ -1912,9 +1761,7 @@ function mensajeErrorDimensiones(errores){
   }).join('<br>');
 }
 
-/* =========================================================
-   13. BLOQUEO
-   ========================================================= */
+/* ============ BLOQUEO ============ */
 function bloquearElemento(key, cls){
   const btn = document.querySelector(`.elem-btn[data-key="${key}"]`);
   if (!btn) return;
@@ -1948,9 +1795,7 @@ function restaurarResultadoElemento(key){
   feedback.innerHTML = e.mensaje;
 }
 
-/* =========================================================
-   14. CÁMARA
-   ========================================================= */
+/* ============ CÁMARA ============ */
 function centrarEnElemento(key, suave = true){
   const def = ELEMENTOS[key];
   const { largo:L, ancho:A, alto:H } = def.dims;
@@ -1979,9 +1824,7 @@ function actualizarTransicionCamara(dt){
   actualizarCamara(); redimensionar();
 }
 
-/* =========================================================
-   15. UI
-   ========================================================= */
+/* ============ UI ============ */
 const selector   = document.getElementById('selector');
 const inLargo    = document.getElementById('in-largo');
 const inAncho    = document.getElementById('in-ancho');
@@ -2006,9 +1849,7 @@ const avisoDim   = document.getElementById('aviso-dim');
 const notaDetalle = document.getElementById('nota-detalle');
 const notaMuro    = document.getElementById('nota-muro');
 const notaPilar   = document.getElementById('nota-pilar');
-
 let selKey = 'muro';
-
 ORDEN_UI.forEach((key, i) => {
   const def = ELEMENTOS[key];
   const btn = document.createElement('button');
@@ -2026,7 +1867,6 @@ ORDEN_UI.forEach(key => {
   s.innerHTML = `<i style="background:${def.color}"></i>${def.corto}`;
   leyenda.appendChild(s);
 });
-
 function seleccionar(key){
   const btn = document.querySelector(`.elem-btn[data-key="${key}"]`);
   if (btn && btn.classList.contains('cubicado')) return;
@@ -2051,7 +1891,6 @@ function seleccionar(key){
   else limpiarResultados();
   centrarEnElemento(key, true);
 }
-
 function actualizarFormulaViva(){
   const L = parseFloat(inLargo.value);
   const A = parseFloat(inAncho.value);
@@ -2074,7 +1913,6 @@ document.getElementById('btn-vaciar').addEventListener('click', () => {
   avisoDim.style.display = 'none';
   actualizarFormulaViva(); inLargo.focus();
 });
-
 function limpiarResultados(){
   badge.className = 'badge'; badge.textContent = 'Sin calcular';
   rReal.textContent = '—'; rEst.textContent = '—';
@@ -2086,11 +1924,8 @@ function limpiarResultados(){
   feedback.innerHTML = 'Lee las cotas del modelo (m, cm o mm), conviértelas a metros, calcula el volumen y escríbelo.';
 }
 
-/* =========================================================
-   16. VERTIDO
-   ========================================================= */
+/* ============ VERTIDO ============ */
 let animacion = null;
-
 function verter(){
   initAudio();
   if (estadoProyecto[selKey]){
@@ -2100,8 +1935,6 @@ function verter(){
     return;
   }
   const def = ELEMENTOS[selKey];
-
-  /* 1) Validar dimensiones */
   const errores = validarDimensiones();
   if (errores.length > 0){
     sonidoError();
@@ -2114,7 +1947,6 @@ function verter(){
     return;
   }
   avisoDim.style.display = 'none';
-
   const { largo:L, ancho:A, alto:H } = def.dims;
   const real = volumenReal(selKey);
   const est = parseFloat(inVol.value);
@@ -2124,111 +1956,82 @@ function verter(){
     feedback.innerHTML = '⚠️ Debes ingresar un <b>volumen total mayor que 0</b>.';
     inVol.focus(); return;
   }
-
-  /* Capturar valores del usuario ANTES de cualquier limpieza */
   const dimsUsuario = {
     L: parseFloat(inLargo.value),
     A: parseFloat(inAncho.value),
     H: parseFloat(inAlto.value)
   };
-
   const diff = est - real;
   const pct  = (diff / real) * 100;
   const ratio = est / real;
   const fillFrac = Math.min(ratio, 1);
   const desborda = ratio > 1.002;
-
   let estado;
   if (Math.abs(pct) <= 2) estado = 'exacto';
   else if (diff < 0)      estado = 'falta';
   else                    estado = 'desborda';
-
   const cls = estado === 'exacto' ? 'ok' : (estado === 'falta' ? 'warn' : 'bad');
   const txt = estado === 'exacto' ? '✔ EXACTO' :
               estado === 'falta'  ? '▼ FALTA HORMIGÓN' : '▲ SE DESBORDA';
   badge.className = 'badge ' + cls; badge.textContent = txt;
-
   rReal.textContent = real.toFixed(3) + ' m³';
   rEst.textContent  = est.toFixed(3) + ' m³';
   rDif.textContent  = (diff >= 0 ? '+' : '') + diff.toFixed(3) + ' m³';
   rPct.textContent  = (pct >= 0 ? '+' : '') + pct.toFixed(2) + ' %';
   rDif.className = 'v ' + cls; rPct.className = 'v ' + cls;
-
   let extraMuro = '';
   if (selKey === 'muro' && def.vano){
     const v = def.vano;
     const vVano = v.ancho * v.alto * A;
     extraMuro = `<br><span style="color:#1e40af">Vano: ${v.ancho.toFixed(2)} × ${v.alto.toFixed(2)} m · a descontar: ${vVano.toFixed(3)} m³.</span>`;
   }
-
   let mensajeHTML = '';
   if (estado === 'exacto'){
-    mensajeHTML =
-      `<b>¡Cubicación correcta!</b> Tu volumen total está dentro del margen del 2&nbsp;%.<br>
+    mensajeHTML = `<b>¡Cubicación correcta!</b> Tu volumen total está dentro del margen del 2&nbsp;%.<br>
        Real: ${real.toFixed(3)} m³ (cotas verificadas ✔).${extraMuro}`;
   } else if (estado === 'falta'){
-    mensajeHTML =
-      `<b>Falta hormigón.</b> Escribiste ${est.toFixed(3)} m³ pero el elemento necesita ${real.toFixed(3)} m³.<br>
+    mensajeHTML = `<b>Falta hormigón.</b> Escribiste ${est.toFixed(3)} m³ pero el elemento necesita ${real.toFixed(3)} m³.<br>
        Te faltan <b>${Math.abs(diff).toFixed(3)} m³</b> (${Math.abs(pct).toFixed(2)}&nbsp;% menos).${extraMuro}`;
   } else {
-    mensajeHTML =
-      `<b>Se desborda.</b> Escribiste ${est.toFixed(3)} m³ y solo caben ${real.toFixed(3)} m³.<br>
+    mensajeHTML = `<b>Se desborda.</b> Escribiste ${est.toFixed(3)} m³ y solo caben ${real.toFixed(3)} m³.<br>
        Sobran <b>${diff.toFixed(3)} m³</b> (${pct.toFixed(2)}&nbsp;% más).${extraMuro}`;
   }
   feedback.className = 'feedback ' + cls;
   feedback.innerHTML = mensajeHTML;
-
-  /* ----- GAMIFICACIÓN ----- */
   juego.intentos++;
-  let puntosGanados = 0;
-  let estrellas = 0;
+  let puntosGanados = 0, estrellas = 0;
   let tipoLogro = estado === 'exacto' ? 'exacto' : (estado === 'falta' ? 'warn' : 'bad');
   let iconoLogro, tituloLogro, subtituloLogro;
-
   if (estado === 'exacto'){
     juego.aciertos++;
     juego.rachaActual++;
     if (juego.rachaActual > juego.mejorRacha) juego.mejorRacha = juego.rachaActual;
-
     const bonusRacha = Math.min(juego.rachaActual - 1, 4) * 25;
     puntosGanados = 100 + bonusRacha;
-
     const absPct = Math.abs(pct);
     if (absPct <= 0.5)      estrellas = 3;
     else if (absPct <= 1.25) estrellas = 2;
     else                    estrellas = 1;
-
     juego.estrellasTotales += estrellas;
     iconoLogro = estrellas === 3 ? '🏆' : '🎯';
     tituloLogro = estrellas === 3 ? '¡PERFECTO!' : '¡EXACTO!';
     subtituloLogro = `Error de ${absPct.toFixed(2)}% · ${estrellas} estrella${estrellas>1?'s':''}`;
-
     sonidoExacto();
     if (juego.rachaActual >= 3) setTimeout(sonidoVictoria, 500);
-
   } else if (estado === 'falta'){
-    juego.rachaActual = 0;
-    puntosGanados = 25;
-    estrellas = 1;
-    iconoLogro = '📉';
-    tituloLogro = 'Falta hormigón';
+    juego.rachaActual = 0; puntosGanados = 25; estrellas = 1;
+    iconoLogro = '📉'; tituloLogro = 'Falta hormigón';
     subtituloLogro = `${Math.abs(diff).toFixed(3)} m³ por debajo`;
     sonidoFalta();
   } else {
-    juego.rachaActual = 0;
-    puntosGanados = 25;
-    estrellas = 1;
-    iconoLogro = '💥';
-    tituloLogro = 'Se desborda';
+    juego.rachaActual = 0; puntosGanados = 25; estrellas = 1;
+    iconoLogro = '💥'; tituloLogro = 'Se desborda';
     subtituloLogro = `${diff.toFixed(3)} m³ de exceso`;
     sonidoDesborda();
   }
-
   juego.puntos += puntosGanados;
   juego.elementosCubicados++;
   actualizarHUDGamificacion();
-
-  /* Guardar resultado */
   estadoProyecto[selKey] = {
     estimado: est, real, diff, pct, ratio, estado, cls, txt, mensaje: mensajeHTML,
     dims: { L, A, H },
@@ -2236,16 +2039,12 @@ function verter(){
   };
   bloquearElemento(selKey, cls);
   actualizarPanelCostos();
-
-  /* Animación del vertido */
   objetos[selKey].fillH = 0;
   objetos[selKey].concreto.visible = false;
   ocultarCharco();
   const dur = Math.min(5, Math.max(3.2, 3.2 + 1.0 * fillFrac + (desborda ? 0.8 : 0)));
   animacion = { key: selKey, t:0, dur, fillFrac, ratio, desborda, estado };
   barraFill.className = cls;
-
-  /* Logro flotante */
   const esUltimo = (juego.elementosCubicados === ORDEN_UI.length);
   setTimeout(() => {
     if (esUltimo && !juego.proyectoCompletado){
@@ -2276,7 +2075,6 @@ function verter(){
     }
   }, 900);
 }
-
 function actualizarAnimacion(dt){
   if (!animacion) return;
   const a = animacion;
@@ -2312,9 +2110,7 @@ function actualizarAnimacion(dt){
   }
 }
 
-/* =========================================================
-   17. CONTROLES
-   ========================================================= */
+/* ============ CONTROLES ============ */
 let arrastrando = false, px = 0, py = 0;
 canvas.addEventListener('pointerdown', e => {
   arrastrando = true; px = e.clientX; py = e.clientY;
@@ -2342,7 +2138,6 @@ canvas.addEventListener('wheel', e => {
   camLerp = 1;
   redimensionar();
 }, { passive:false });
-
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
   if (ach.el.classList.contains('show')){
@@ -2358,17 +2153,13 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Enter') verter();
   else if (e.key.toLowerCase() === 'c') centrarEnElemento(selKey, true);
 });
-
-/* Escape / Enter para cerrar el informe */
 document.addEventListener('keydown', e => {
   if (document.getElementById('informe-final').classList.contains('show')){
     if (e.key === 'Escape'){ ocultarInforme(); e.preventDefault(); e.stopPropagation(); }
   }
 }, true);
 
-/* =========================================================
-   18. RESIZE + LOOP
-   ========================================================= */
+/* ============ RESIZE + LOOP ============ */
 function redimensionar(){
   const w = contenedor.clientWidth || 800;
   const h = contenedor.clientHeight || 600;
@@ -2382,7 +2173,6 @@ function redimensionar(){
   actualizarEscalaEtiquetas();
 }
 window.addEventListener('resize', redimensionar);
-
 let tPrev = performance.now();
 function loop(now){
   requestAnimationFrame(loop);
@@ -2398,13 +2188,10 @@ function loop(now){
   renderer.render(scene, cam);
 }
 
-/* =========================================================
-   19. ARRANQUE
-   ========================================================= */
+/* ============ ARRANQUE ============ */
 document.getElementById('btn-verter').addEventListener('click', () => { initAudio(); verter(); });
 document.getElementById('btn-centrar').addEventListener('click', () => { sonidoClick(); centrarEnElemento(selKey, true); });
 document.getElementById('btn-centrar-hud').addEventListener('click', () => { sonidoClick(); centrarEnElemento(selKey, true); });
-
 document.getElementById('btn-reset').addEventListener('click', () => {
   sonidoClick();
   ocultarInforme();
@@ -2422,13 +2209,9 @@ document.getElementById('btn-reset').addEventListener('click', () => {
   actualizarTodo();
   seleccionar('muro');
 });
-
-/* Botón de informe permanente */
 document.getElementById('btn-informe').addEventListener('click', () => {
   initAudio(); sonidoClick(); mostrarInforme();
 });
-
-/* Toggle sonido */
 const btnSound = document.getElementById('btn-sound');
 btnSound.addEventListener('click', () => {
   sonidoActivo = !sonidoActivo;
@@ -2437,7 +2220,6 @@ btnSound.addEventListener('click', () => {
   if (sonidoActivo){ initAudio(); sonidoClick(); }
 });
 
-/* --- Arranque --- */
 randomizarDimensiones();
 actualizarCamara();
 redimensionar();
