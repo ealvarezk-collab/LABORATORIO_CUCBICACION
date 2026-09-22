@@ -440,6 +440,17 @@
     .inf-header{background:#fff}
     .inf-tabla th,.kpi,.desemp-item,.chip,.inf-tabla tfoot td{
       -webkit-print-color-adjust:exact;print-color-adjust:exact}
+html,body{margin:0!important;padding:0!important;max-width:none!important}
+#app{min-height:600px;min-width:900px}
+@media (max-width:1180px){
+  #panel-izq{width:260px}
+  #panel-der{width:290px}
+}
+@media (max-width:960px){
+  #app{min-width:100%;flex-direction:column;height:auto;min-height:100vh}
+  #panel-izq,#panel-der{width:100%;border-left:none;border-right:none;border-bottom:1px solid var(--line)}
+  #viewport{min-height:420px;flex:1 0 420px}
+}
   }
 </style>
 </head>
